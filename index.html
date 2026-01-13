@@ -8,8 +8,8 @@
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&amp;family=Inter:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -455,6 +455,92 @@
             padding: 12px;
             margin-top: 8px;
         }
+        
+        /* Profil Düzenleme Modal */
+        .profile-edit-modal {
+            max-width: 500px;
+            width: 90vw;
+        }
+        
+        @media (min-width: 768px) {
+            .profile-edit-modal {
+                width: 450px;
+            }
+        }
+        
+        /* Profil avatar */
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        @media (min-width: 768px) {
+            .profile-avatar {
+                width: 150px;
+                height: 150px;
+            }
+        }
+        
+        /* Bio alanı */
+        .bio-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        /* PC için yatay düzen */
+        @media (min-width: 768px) {
+            .profile-horizontal {
+                display: flex;
+                gap: 3rem;
+                align-items: flex-start;
+            }
+            
+            .profile-sidebar {
+                width: 300px;
+                flex-shrink: 0;
+            }
+            
+            .profile-main {
+                flex: 1;
+            }
+        }
+        
+        /* PC için arama çubuğu */
+        @media (min-width: 1024px) {
+            .search-container {
+                max-width: 500px;
+                margin: 0 auto 2rem auto;
+            }
+        }
+        
+        /* Gradient border */
+        .gradient-border {
+            border: 2px solid transparent;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(to right, #8e8d8a, #1a1a1a) border-box;
+        }
+        
+        /* Custom scrollbar for PC */
+        @media (min-width: 768px) {
+            .custom-scrollbar::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 4px;
+            }
+            
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #8e8d8a;
+                border-radius: 4px;
+            }
+            
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                background: #666;
+            }
+        }
     </style>
 </head>
 <body class="selection:bg-primary-accent selection:text-white">
@@ -512,6 +598,13 @@
 <div id="detail-modal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 fade-in hidden">
     <div class="detail-popup bg-white rounded-2xl overflow-hidden shadow-2xl slide-up max-h-[90vh] overflow-y-auto">
         <!-- Content will be loaded here -->
+    </div>
+</div>
+
+<!-- Profile Edit Modal -->
+<div id="profile-edit-modal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 fade-in hidden">
+    <div class="profile-edit-modal bg-white rounded-2xl overflow-hidden shadow-2xl slide-up max-h-[90vh] overflow-y-auto">
+        <!-- Profile edit content will be loaded here -->
     </div>
 </div>
 
@@ -644,6 +737,17 @@
                 <button onclick="setFilter('all')" id="filter-all" class="px-3 lg:px-4 py-1 lg:py-1.5 text-[10px] lg:text-xs uppercase tracking-widest bg-charcoal text-white rounded">Tümü</button>
                 <button onclick="setFilter('lost')" id="filter-lost" class="px-3 lg:px-4 py-1 lg:py-1.5 text-[10px] lg:text-xs uppercase tracking-widest bg-off-white text-lost-red border thin-border rounded">Kayıp</button>
                 <button onclick="setFilter('found')" id="filter-found" class="px-3 lg:px-4 py-1 lg:py-1.5 text-[10px] lg:text-xs uppercase tracking-widest bg-off-white text-found-green border thin-border rounded">Bulunan</button>
+            </div>
+        </div>
+        
+        <!-- Arama Çubuğu -->
+        <div class="search-container">
+            <div class="relative">
+                <input type="text" id="search-input" placeholder="İlanlarda ara..."
+                       class="w-full px-6 py-4 bg-white border thin-border rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-charcoal/30 focus:border-transparent outline-none text-sm lg:text-base pl-12">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 transform -translate-y-1/2 text-charcoal/40">
+                    search
+                </span>
             </div>
         </div>
         
@@ -860,8 +964,8 @@
 <!-- Firebase and App Logic -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getDatabase, ref, push, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getDatabase, ref, push, set, onValue, update, get, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBB_cc3y2r8qvZQx1wwmNyhqu6joYumj3Q",
@@ -892,6 +996,10 @@
     let selectedLng = null;
     let selectedAddress = "Konum seçilmedi";
     let locationMarker = null;
+    
+    // Arama değişkeni
+    let searchTerm = '';
+    let allItems = [];
 
     // --- Loading Overlay ---
     function showLoading() {
@@ -956,6 +1064,15 @@
         setAdType('lost');
         setFilter('all');
         createFloatingDots();
+        
+        // Arama input event listener
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                searchTerm = this.value.toLowerCase();
+                loadExploreItems();
+            });
+        }
         
         if (window.innerWidth > 1024) {
             document.body.classList.add('text-lg');
@@ -1183,6 +1300,7 @@
                     email: email,
                     bio: "",
                     phone: "",
+                    contact: "",
                     profileImage: "",
                     createdAt: new Date().toISOString()
                 });
@@ -1223,6 +1341,7 @@
         
         closeDetailModal();
         closeLocationModal();
+        closeProfileEditModal();
         
         if (currentPopup && turkeyMap) {
             turkeyMap.closePopup(currentPopup);
@@ -1610,15 +1729,15 @@
         container.innerHTML = '<div class="col-span-full text-center py-12"><div class="animate-spin w-8 h-8 border-2 border-charcoal/20 border-t-charcoal rounded-full mx-auto"></div></div>';
         
         onValue(ref(db, 'items'), (snapshot) => {
-            const items = [];
+            allItems = [];
             snapshot.forEach((child) => {
                 const item = child.val();
-                items.push(item);
+                allItems.push(item);
             });
             
-            items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            allItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             const recentCount = window.innerWidth > 1536 ? 4 : window.innerWidth > 1024 ? 3 : 3;
-            const recentItems = items.slice(0, recentCount);
+            const recentItems = allItems.slice(0, recentCount);
             
             displayItems(recentItems, container);
         }, (error) => {
@@ -1639,17 +1758,30 @@
         container.innerHTML = '<div class="col-span-full text-center py-12"><div class="animate-spin w-8 h-8 border-2 border-charcoal/20 border-t-charcoal rounded-full mx-auto"></div></div>';
         
         onValue(ref(db, 'items'), (snapshot) => {
-            const items = [];
+            allItems = [];
             snapshot.forEach((child) => {
                 const item = child.val();
-                if (currentFilter === 'all' || item.type === currentFilter) {
-                    items.push(item);
-                }
+                allItems.push(item);
             });
             
-            items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            allItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             
-            displayItems(items, container);
+            // Filtreleme
+            let filteredItems = allItems;
+            
+            if (currentFilter !== 'all') {
+                filteredItems = filteredItems.filter(item => item.type === currentFilter);
+            }
+            
+            // Arama filtresi
+            if (searchTerm) {
+                filteredItems = filteredItems.filter(item => 
+                    item.title.toLowerCase().includes(searchTerm) ||
+                    item.description.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            displayItems(filteredItems, container);
         });
     };
 
@@ -1660,7 +1792,7 @@
                     <div class="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mx-auto mb-3">
                         <span class="material-symbols-outlined text-charcoal/40">search_off</span>
                     </div>
-                    <p class="text-sm text-charcoal/40">Henüz ilan bulunmuyor.</p>
+                    <p class="text-sm text-charcoal/40">${searchTerm ? 'Aramanızla eşleşen ilan bulunamadı.' : 'Henüz ilan bulunmuyor.'}</p>
                     <button onclick="showPage('add')" class="mt-3 px-4 py-1.5 bg-charcoal text-white text-xs rounded-lg">
                         İlk İlanı Sen Ver
                     </button>
@@ -1911,13 +2043,15 @@
             
             container.innerHTML = `
                 <div class="mb-8 lg:mb-12">
-                    <div class="flex items-center justify-between mb-6 lg:mb-8">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 lg:mb-8">
                         <div>
                             <h2 class="text-3xl lg:text-4xl font-serif font-light italic mb-2">${userData?.name || 'Kullanıcı'}</h2>
                             <p class="text-sm lg:text-base text-charcoal/40">${userData?.email || currentUser?.email || ''}</p>
+                            ${userData?.bio ? `<p class="text-sm lg:text-base text-charcoal/60 mt-2">${userData.bio}</p>` : ''}
+                            ${userData?.contact ? `<p class="text-sm lg:text-base text-charcoal/40 mt-1">📞 ${userData.contact}</p>` : ''}
                         </div>
                         <div class="flex gap-2 lg:gap-3">
-                            <button onclick="openEditModal()" class="px-4 lg:px-6 py-2 lg:py-3 bg-charcoal text-white text-xs lg:text-sm rounded-lg lg:rounded-xl">
+                            <button onclick="openProfileEditModal()" class="px-4 lg:px-6 py-2 lg:py-3 bg-charcoal text-white text-xs lg:text-sm rounded-lg lg:rounded-xl">
                                 Profili Düzenle
                             </button>
                             <button onclick="logout()" class="px-4 lg:px-6 py-2 lg:py-3 bg-lost-red text-white text-xs lg:text-sm rounded-lg lg:rounded-xl">
@@ -2006,8 +2140,174 @@
         }
     };
 
-    window.openEditModal = async () => {
-        alert("Profil düzenleme özelliği yakında eklenecek!");
+    window.openProfileEditModal = async () => {
+        showLoading();
+        try {
+            const userSnap = await get(ref(db, `users/${currentUser.uid}`));
+            const userData = userSnap.val();
+            
+            const modal = document.getElementById('profile-edit-modal');
+            modal.innerHTML = `
+                <div class="profile-edit-modal bg-white rounded-2xl overflow-hidden shadow-2xl slide-up max-h-[90vh] overflow-y-auto">
+                    <div class="p-6 lg:p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl lg:text-3xl font-serif font-light">Profili Düzenle</h2>
+                            <button onclick="closeProfileEditModal()" class="p-2 hover:bg-charcoal/5 rounded-lg transition">
+                                <span class="material-symbols-outlined text-charcoal/60">close</span>
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="flex flex-col items-center">
+                                <div class="relative mb-4">
+                                    <img id="profile-preview" src="${userData?.profileImage || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAHgmz9ZdyrrnVStj22LkErbA8T2RxayfdXNwm9XagSatARcd3ffXC_gnMjwdMeTVIM1_naprdoDBH5E3oQbSpPToZ9pFGChkcvGo7fUPwhQIeIDqqxkhg_0GG1S_EIbuKM63LbIbQBaMofSj_XkXehUr35iKp9AOfl7D_5tV9hf9L31MrtXPhZTrnFNVIgStVmeBJPzZwRvfbNPNyWtRAxeHdGww_HnK4TbZVi8SjQ246qUt_7_Kf_MPPuOxI2yvPYY3om-iE61Vc'}" 
+                                         class="profile-avatar rounded-full border-4 border-white shadow-lg">
+                                    <button onclick="document.getElementById('profile-image-input').click()" 
+                                            class="absolute bottom-2 right-2 size-10 bg-charcoal text-white rounded-full flex items-center justify-center hover:bg-charcoal/90 transition">
+                                        <span class="material-symbols-outlined text-sm">photo_camera</span>
+                                    </button>
+                                </div>
+                                <input type="file" id="profile-image-input" class="hidden" accept="image/*">
+                                <p class="text-xs text-charcoal/40">Profil fotoğrafı değiştir</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-charcoal/60 mb-2">Ad Soyad</label>
+                                <input type="text" id="edit-name" value="${userData?.name || ''}" 
+                                       class="w-full px-4 py-3 bg-off-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-charcoal/60 mb-2">Bio</label>
+                                <textarea id="edit-bio" rows="3" 
+                                          class="w-full px-4 py-3 bg-off-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none resize-none bio-textarea">${userData?.bio || ''}</textarea>
+                                <p class="text-xs text-charcoal/40 mt-1">Kendiniz hakkında kısa bir açıklama</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-charcoal/60 mb-2">İletişim Bilgileri</label>
+                                <input type="text" id="edit-contact" value="${userData?.contact || ''}" 
+                                       class="w-full px-4 py-3 bg-off-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none">
+                                <p class="text-xs text-charcoal/40 mt-1">Telefon numarası veya diğer iletişim bilgileri</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-charcoal/60 mb-2">E-posta</label>
+                                <input type="email" value="${currentUser?.email || ''}" disabled
+                                       class="w-full px-4 py-3 bg-charcoal/5 border thin-border rounded-lg outline-none cursor-not-allowed">
+                                <p class="text-xs text-charcoal/40 mt-1">E-posta değiştirilemez</p>
+                            </div>
+                            
+                            <div class="pt-4">
+                                <button onclick="saveProfileChanges()" class="w-full py-3 bg-found-green text-white font-medium rounded-lg hover:bg-found-green/90 transition">
+                                    Değişiklikleri Kaydet
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            
+            // Profil fotoğrafı yükleme
+            document.getElementById('profile-image-input').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert("Dosya boyutu 5MB'tan küçük olmalıdır.");
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById('profile-preview').src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            hideLoading();
+            
+        } catch (error) {
+            console.error("Profil düzenleme modalı yükleme hatası:", error);
+            alert("Profil düzenleme sayfası yüklenirken bir hata oluştu.");
+            hideLoading();
+        }
+    };
+
+    window.closeProfileEditModal = () => {
+        document.getElementById('profile-edit-modal').classList.add('hidden');
+    };
+
+    window.saveProfileChanges = async () => {
+        showLoading();
+        
+        try {
+            const name = document.getElementById('edit-name').value.trim();
+            const bio = document.getElementById('edit-bio').value.trim();
+            const contact = document.getElementById('edit-contact').value.trim();
+            const profileImageInput = document.getElementById('profile-image-input');
+            
+            const updates = {
+                name: name || currentUser.email.split('@')[0],
+                bio: bio,
+                contact: contact,
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Profil fotoğrafı güncelleme
+            if (profileImageInput.files[0]) {
+                const file = profileImageInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = async (event) => {
+                    updates.profileImage = event.target.result;
+                    
+                    // Firebase Authentication'daki display name'i güncelle
+                    await updateProfile(currentUser, {
+                        displayName: updates.name
+                    });
+                    
+                    // Database'de güncelle
+                    await update(ref(db, `users/${currentUser.uid}`), updates);
+                    
+                    // Başarı mesajı
+                    alert("✅ Profil başarıyla güncellendi!");
+                    closeProfileEditModal();
+                    loadProfilePage();
+                    
+                    // Header'ı güncelle
+                    const headerImg = document.getElementById('header-profile-img');
+                    if (headerImg) {
+                        headerImg.src = updates.profileImage;
+                    }
+                    
+                    hideLoading();
+                };
+                
+                reader.readAsDataURL(file);
+            } else {
+                // Firebase Authentication'daki display name'i güncelle
+                await updateProfile(currentUser, {
+                    displayName: updates.name
+                });
+                
+                // Database'de güncelle
+                await update(ref(db, `users/${currentUser.uid}`), updates);
+                
+                // Başarı mesajı
+                alert("✅ Profil başarıyla güncellendi!");
+                closeProfileEditModal();
+                loadProfilePage();
+                hideLoading();
+            }
+            
+        } catch (error) {
+            console.error("Profil güncelleme hatası:", error);
+            alert("Profil güncelleme sırasında bir hata oluştu: " + error.message);
+            hideLoading();
+        }
     };
 
     // --- Search and Filter ---
@@ -2062,19 +2362,26 @@
         if (user) {
             document.getElementById('auth-modal').classList.add('hidden');
             
-            document.getElementById('header-profile').innerHTML = `
-                <div class="flex items-center gap-3">
-                    <button onclick="showPage('profile')" class="size-8 lg:size-10 overflow-hidden rounded-full ring-1 ring-charcoal/5">
-                        <img id="header-profile-img" class="h-full w-full object-cover grayscale opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHgmz9ZdyrrnVStj22LkErbA8T2RxayfdXNwm9XagSatARcd3ffXC_gnMjwdMeTVIM1_naprdoDBH5E3oQbSpPToZ9pFGChkcvGo7fUPwhQIeIDqqxkhg_0GG1S_EIbuKM63LbIbQBaMofSj_XkXehUr35iKp9AOfl7D_5tV9hf9L31MrtXPhZTrnFNVIgStVmeBJPzZwRvfbNPNyWtRAxeHdGww_HnK4TbZVi8SjQ246qUt_7_Kf_MPPuOxI2yvPYY3om-iE61Vc">
-                    </button>
-                </div>
-            `;
-            
             get(ref(db, `users/${user.uid}`)).then((snap) => {
                 const userData = snap.val();
-                if (userData?.profileImage) {
-                    document.getElementById('header-profile-img').src = userData.profileImage;
-                }
+                
+                document.getElementById('header-profile').innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <button onclick="showPage('profile')" class="size-8 lg:size-10 overflow-hidden rounded-full ring-1 ring-charcoal/5">
+                            <img id="header-profile-img" class="h-full w-full object-cover grayscale opacity-80" 
+                                 src="${userData?.profileImage || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAHgmz9ZdyrrnVStj22LkErbA8T2RxayfdXNwm9XagSatARcd3ffXC_gnMjwdMeTVIM1_naprdoDBH5E3oQbSpPToZ9pFGChkcvGo7fUPwhQIeIDqqxkhg_0GG1S_EIbuKM63LbIbQBaMofSj_XkXehUr35iKp9AOfl7D_5tV9hf9L31MrtXPhZTrnFNVIgStVmeBJPzZwRvfbNPNyWtRAxeHdGww_HnK4TbZVi8SjQ246qUt_7_Kf_MPPuOxI2yvPYY3om-iE61Vc'}">
+                        </button>
+                    </div>
+                `;
+            }).catch(() => {
+                document.getElementById('header-profile').innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <button onclick="showPage('profile')" class="size-8 lg:size-10 overflow-hidden rounded-full ring-1 ring-charcoal/5">
+                            <img id="header-profile-img" class="h-full w-full object-cover grayscale opacity-80" 
+                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHgmz9ZdyrrnVStj22LkErbA8T2RxayfdXNwm9XagSatARcd3ffXC_gnMjwdMeTVIM1_naprdoDBH5E3oQbSpPToZ9pFGChkcvGo7fUPwhQIeIDqqxkhg_0GG1S_EIbuKM63LbIbQBaMofSj_XkXehUr35iKp9AOfl7D_5tV9hf9L31MrtXPhZTrnFNVIgStVmeBJPzZwRvfbNPNyWtRAxeHdGww_HnK4TbZVi8SjQ246qUt_7_Kf_MPPuOxI2yvPYY3om-iE61Vc">
+                        </button>
+                    </div>
+                `;
             });
             
             loadRecentItems();
