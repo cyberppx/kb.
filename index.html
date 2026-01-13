@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html class="light" lang="tr">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>kb. - Kayıp/Buluntu Platformu</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&amp;family=Inter:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Custom Config -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-accent": "#8e8d8a",
+                        "charcoal": "#1a1a1a",
+                        "off-white": "#faf9f6",
+                        "border-color": "#e5e5e5",
+                        "found-green": "#059669",
+                        "lost-red": "#dc2626"
+                    },
+                    fontFamily: {
+                        "serif": ["Cormorant Garamond", "serif"],
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+
+    <style>
+        @layer base {
+            body {
+                @apply bg-off-white text-charcoal font-sans antialiased;
+                min-height: max(884px, 100dvh);
+            }
+            h1, h2, h3 {
+                @apply font-serif;
+            }
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .thin-border {
+            border: 0.5px solid #e5e5e5;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .slide-up {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        .selection\:bg-primary-accent *::selection {
+            background-color: #8e8d8a;
+            color: white;
+        }
+        
+        /* Leaflet map fixes */
+        .leaflet-container {
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        .custom-popup .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .custom-popup .leaflet-popup-content {
+            margin: 0;
+            width: 320px !important;
+        }
+        
+        .custom-popup .leaflet-popup-tip {
+            background: white;
+        }
+        
+        /* Item detail popup */
+        .detail-popup {
+            max-width: 800px;
+            width: 90vw;
+        }
+        
+        @media (min-width: 768px) {
+            .detail-popup {
+                width: 80vw;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .detail-popup {
+                width: 700px;
+            }
+        }
+        
+        .map-mini {
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .bottom-nav-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="selection:bg-primary-accent selection:text-white">
+
+<!-- Authentication Modal -->
+<div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 fade-in hidden">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl slide-up relative overflow-hidden">
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-charcoal rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-white text-3xl">search_check</span>
+            </div>
+            <h2 id="auth-title" class="text-2xl font-serif font-light italic mb-2">Giriş Yap</h2>
+            <p class="text-charcoal/40 text-sm">Topluluğa katıl, kayıp ve buluntuları yönet</p>
+        </div>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-charcoal/60 mb-2">E-posta</label>
+                <input type="email" id="auth-email" placeholder="ornek@email.com" 
+                       class="w-full px-4 py-3 bg-off-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-charcoal/60 mb-2">Şifre</label>
+                <input type="password" id="auth-pass" placeholder="••••••••" 
+                       class="w-full px-4 py-3 bg-off-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm">
+            </div>
+            
+            <button onclick="handleAuth()" id="auth-btn" 
+                    class="w-full py-3 bg-charcoal text-white font-medium rounded-lg hover:bg-charcoal/90 transition text-sm">
+                <span id="auth-btn-text">GİRİŞ YAP</span>
+            </button>
+            
+            <div class="text-center pt-4">
+                <p onclick="toggleAuthMode()" id="auth-toggle" 
+                   class="text-sm text-charcoal/60 hover:text-charcoal cursor-pointer transition">
+                    Hesabınız yok mu? <span class="underline">Kayıt Ol</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm flex items-center justify-center hidden fade-in">
+    <div class="bg-white p-6 rounded-xl shadow-xl">
+        <div class="flex flex-col items-center gap-3">
+            <div class="w-12 h-12 border-2 border-charcoal/20 border-t-charcoal rounded-full animate-spin"></div>
+            <p class="text-sm text-charcoal/60">Yükleniyor...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Item Detail Popup -->
+<div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 fade-in hidden">
+    <div class="detail-popup bg-white rounded-2xl overflow-hidden shadow-2xl slide-up max-h-[90vh] overflow-y-auto">
+        <!-- Content will be loaded here -->
+    </div>
+</div>
+
+<!-- Header -->
+<header class="sticky top-0 z-40 bg-off-white/80 backdrop-blur-md px-6 py-5 flex items-center justify-between">
+    <div class="flex items-center gap-2 cursor-pointer" onclick="showPage('home')">
+        <span class="font-serif italic text-2xl tracking-tighter">kb.</span>
+    </div>
+    
+    <div id="header-profile" class="flex items-center gap-3">
+        <!-- User avatar will be inserted here -->
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="flex-1 pb-32">
+    <!-- Home Page -->
+    <section id="page-home" class="space-y-12 fade-in">
+        <!-- Hero Section -->
+        <section class="px-8 pt-8 pb-12 text-center">
+            <h1 class="text-[44px] leading-tight font-serif font-light italic mb-4">Finding the lost.</h1>
+            <p class="text-charcoal/40 font-light text-sm tracking-widest uppercase">A curated lost & found platform</p>
+        </section>
+        
+        <!-- Search Section -->
+        <div class="px-8 mb-12">
+            <div class="relative max-w-md mx-auto">
+                <input type="text" id="search-keyword" placeholder="What was left behind?"
+                       class="w-full h-14 bg-white border-none rounded-full px-8 text-sm focus:ring-0 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all placeholder:text-charcoal/20">
+                <div class="absolute right-4 top-1/2 -translate-y-1/2">
+                    <button onclick="searchItems()" class="size-10 flex items-center justify-center bg-charcoal text-off-white rounded-full scale-90 hover:scale-100 transition">
+                        <span class="material-symbols-outlined text-lg font-extralight">east</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Categories -->
+        <div class="px-8 mb-16">
+            <div class="flex overflow-x-auto gap-6 scrollbar-hide py-2 border-y border-charcoal/5">
+                <button onclick="quickSearch('köpek')" class="whitespace-nowrap text-[11px] uppercase tracking-[0.2em] font-medium text-charcoal/60 hover:text-charcoal transition-colors">Köpek</button>
+                <button onclick="quickSearch('kedi')" class="whitespace-nowrap text-[11px] uppercase tracking-[0.2em] font-medium text-charcoal/60 hover:text-charcoal transition-colors">Kedi</button>
+                <button onclick="quickSearch('cüzdan')" class="whitespace-nowrap text-[11px] uppercase tracking-[0.2em] font-medium text-charcoal/60 hover:text-charcoal transition-colors">Cüzdan</button>
+                <button onclick="quickSearch('telefon')" class="whitespace-nowrap text-[11px] uppercase tracking-[0.2em] font-medium text-charcoal/60 hover:text-charcoal transition-colors">Telefon</button>
+                <button onclick="quickSearch('anahtar')" class="whitespace-nowrap text-[11px] uppercase tracking-[0.2em] font-medium text-charcoal/60 hover:text-charcoal transition-colors">Anahtar</button>
+            </div>
+        </div>
+        
+        <!-- Recent Items -->
+        <div class="px-6 space-y-8">
+            <div class="flex items-end justify-between px-2">
+                <h2 class="text-3xl font-serif font-light">Latest Registry</h2>
+                <button onclick="showPage('explore')" class="text-[10px] uppercase tracking-widest text-charcoal/40 pb-1 border-b border-charcoal/20 hover:text-charcoal transition">Archive</button>
+            </div>
+            
+            <div id="recent-items" class="grid grid-cols-1 gap-12">
+                <!-- Items will be loaded here -->
+                <div class="text-center py-12">
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="w-12 h-12 border-2 border-charcoal/20 border-t-charcoal rounded-full animate-spin"></div>
+                        <p class="text-sm text-charcoal/40">Yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Explore Page -->
+    <section id="page-explore" class="hidden px-6 space-y-12">
+        <div class="flex items-end justify-between px-2 pt-8">
+            <h2 class="text-3xl font-serif font-light">All Items</h2>
+            <div class="flex gap-2">
+                <button onclick="setFilter('all')" id="filter-all" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-charcoal text-white rounded">All</button>
+                <button onclick="setFilter('lost')" id="filter-lost" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-off-white text-lost-red border thin-border rounded">Lost</button>
+                <button onclick="setFilter('found')" id="filter-found" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-off-white text-found-green border thin-border rounded">Found</button>
+            </div>
+        </div>
+        
+        <div id="explore-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Items will be loaded here -->
+        </div>
+    </section>
+    
+    <!-- Map View Page -->
+    <section id="page-map-view" class="hidden px-4 space-y-8">
+        <div class="flex items-end justify-between px-2 pt-8">
+            <h2 class="text-3xl font-serif font-light">Map View</h2>
+            <div class="flex gap-2">
+                <button onclick="showAllMarkers()" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-charcoal text-white rounded">All</button>
+                <button onclick="filterMarkers('lost')" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-off-white text-lost-red border thin-border rounded">Lost</button>
+                <button onclick="filterMarkers('found')" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-off-white text-found-green border thin-border rounded">Found</button>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl overflow-hidden thin-border shadow-sm">
+            <div id="turkey-map" class="h-64 md:h-80 w-full"></div>
+        </div>
+        
+        <div id="map-items-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Map items will be loaded here -->
+        </div>
+    </section>
+    
+    <!-- Add Item Page -->
+    <section id="page-add" class="hidden">
+        <div class="max-w-lg mx-auto px-6 py-8">
+            <div class="mb-8">
+                <h2 class="text-3xl font-serif font-light mb-2">Create New</h2>
+                <p class="text-sm text-charcoal/40">Share lost or found items with the community</p>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Item Type</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="type-lost" onclick="setAdType('lost')" class="py-4 rounded-lg bg-white border thin-border text-lost-red font-medium hover:border-lost-red transition">
+                            <span class="flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-sm">search</span>
+                                Lost
+                            </span>
+                        </button>
+                        <button id="type-found" onclick="setAdType('found')" class="py-4 rounded-lg bg-white border thin-border text-charcoal/60 font-medium hover:border-found-green hover:text-found-green transition">
+                            <span class="flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-sm">check_circle</span>
+                                Found
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Title</label>
+                    <input type="text" id="add-title" placeholder="Golden Retriever lost, Wallet found..." 
+                           class="w-full px-4 py-3 bg-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Description</label>
+                    <textarea id="add-desc" rows="3" placeholder="Detailed description (features, last seen location, contact information etc.)..." 
+                              class="w-full px-4 py-3 bg-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm resize-none"></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Contact Number</label>
+                    <input type="tel" id="add-phone" placeholder="+90 555 123 45 67" 
+                           class="w-full px-4 py-3 bg-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Photo</label>
+                    <div onclick="document.getElementById('file-input').click()" class="border-2 border-dashed border-charcoal/10 rounded-lg p-8 text-center cursor-pointer hover:border-charcoal/20 transition bg-white">
+                        <div class="w-12 h-12 mx-auto mb-3 bg-charcoal/5 rounded-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-charcoal/40">photo_camera</span>
+                        </div>
+                        <p class="text-sm text-charcoal/60">Click to upload photo</p>
+                        <p class="text-xs text-charcoal/40 mt-1">PNG, JPG (Max. 5MB)</p>
+                        <input type="file" id="file-input" class="hidden" accept="image/*">
+                    </div>
+                    <div id="image-preview" class="mt-4 hidden">
+                        <img id="preview-img" class="w-full max-h-64 object-contain rounded-lg thin-border">
+                    </div>
+                </div>
+                
+                <button onclick="saveAd()" id="save-btn" 
+                        class="w-full py-3 bg-charcoal text-white font-medium rounded-lg hover:bg-charcoal/90 transition text-sm">
+                    <span id="save-btn-text">Publish Item</span>
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Profile Page -->
+    <section id="page-profile" class="hidden">
+        <div id="profile-content" class="max-w-4xl mx-auto px-6 py-8">
+            <!-- Profile content will be loaded here -->
+        </div>
+    </section>
+</main>
+
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-4 bottom-nav-blur bg-gradient-to-t from-off-white via-off-white/95 to-transparent">
+    <div class="flex items-center justify-around h-16 bg-charcoal rounded-full px-6 shadow-2xl">
+        <button data-page="home" class="text-off-white hover:text-off-white/80 transition-colors">
+            <span class="material-symbols-outlined font-extralight text-2xl">home</span>
+        </button>
+        <button data-page="map-view" class="text-off-white/60 hover:text-off-white transition-colors">
+            <span class="material-symbols-outlined font-extralight text-2xl">location_on</span>
+        </button>
+        <button data-page="add" class="relative -top-12 size-16 bg-primary-accent rounded-full flex items-center justify-center text-white shadow-xl ring-8 ring-off-white/10 hover:scale-105 transition">
+            <span class="material-symbols-outlined text-3xl font-extralight">add</span>
+        </button>
+        <button data-page="explore" class="text-off-white/60 hover:text-off-white transition-colors">
+            <span class="material-symbols-outlined font-extralight text-2xl">explore</span>
+        </button>
+        <button data-page="profile" class="text-off-white/60 hover:text-off-white transition-colors">
+            <span class="material-symbols-outlined font-extralight text-2xl">account_circle</span>
+        </button>
+    </div>
+</nav>
+
+<!-- Firebase and App Logic -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getDatabase, ref, push, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBB_cc3y2r8qvZQx1wwmNyhqu6joYumj3Q",
+        authDomain: "ekopsim.firebaseapp.com",
+        databaseURL: "https://ekopsim-default-rtdb.firebaseio.com",
+        projectId: "ekopsim",
+        storageBucket: "ekopsim.firebasestorage.app",
+        messagingSenderId: "488553599548",
+        appId: "1:488553599548:web:cbbf5ec6ab5f3ca1912939"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    let currentUser = null;
+    let currentFilter = 'all';
+    let adType = 'lost';
+    let turkeyMap = null;
+    let markers = [];
+    let selectedImage = null;
+    let isLoading = false;
+
+    // --- Loading Overlay ---
+    function showLoading() {
+        if (!isLoading) {
+            isLoading = true;
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+    }
+
+    function hideLoading() {
+        isLoading = false;
+        document.getElementById('loading-overlay').classList.add('hidden');
+    }
+
+    // --- Bottom Navigation Setup ---
+    function setupBottomNavigation() {
+        const navButtons = document.querySelectorAll('nav button[data-page]');
+        navButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const page = this.getAttribute('data-page');
+                if (page) {
+                    showPage(page);
+                }
+            });
+        });
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        setupBottomNavigation();
+        showPage('home');
+        setAdType('lost');
+        setFilter('all');
+        
+        // Initialize map after a delay
+        setTimeout(() => {
+            if (document.getElementById('turkey-map')) {
+                initTurkeyMap();
+            }
+        }, 1000);
+    });
+
+    // --- Authentication ---
+    window.toggleAuthMode = () => {
+        const title = document.getElementById('auth-title');
+        const btn = document.getElementById('auth-btn-text');
+        const toggle = document.getElementById('auth-toggle');
+        
+        if (title.textContent === "Giriş Yap") {
+            title.textContent = "Kayıt Ol";
+            btn.textContent = "KAYIT OL";
+            toggle.innerHTML = 'Zaten hesabınız var mı? <span class="underline">Giriş Yap</span>';
+        } else {
+            title.textContent = "Giriş Yap";
+            btn.textContent = "GİRİŞ YAP";
+            toggle.innerHTML = 'Hesabınız yok mu? <span class="underline">Kayıt Ol</span>';
+        }
+    };
+
+    window.handleAuth = async () => {
+        const email = document.getElementById('auth-email').value.trim();
+        const pass = document.getElementById('auth-pass').value;
+        
+        if (!email || !pass) {
+            alert("Lütfen tüm alanları doldurun.");
+            return;
+        }
+        
+        const btn = document.getElementById('auth-btn');
+        const btnText = document.getElementById('auth-btn-text');
+        const originalText = btnText.textContent;
+        btnText.textContent = "İşleniyor...";
+        btn.disabled = true;
+        
+        showLoading();
+        
+        try {
+            if (originalText === "KAYIT OL") {
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                await set(ref(db, `users/${cred.user.uid}`), {
+                    name: email.split('@')[0],
+                    email: email,
+                    bio: "",
+                    phone: "",
+                    profileImage: "",
+                    createdAt: new Date().toISOString()
+                });
+                alert("🎉 Kayıt başarılı! Topluluğumuza hoş geldiniz.");
+            } else {
+                await signInWithEmailAndPassword(auth, email, pass);
+            }
+        } catch (error) {
+            alert("Hata: " + error.message);
+        } finally {
+            hideLoading();
+            btnText.textContent = originalText;
+            btn.disabled = false;
+        }
+    };
+
+    window.logout = async () => {
+        if (confirm("Çıkış yapmak istediğinize emin misiniz?")) {
+            showLoading();
+            try {
+                await signOut(auth);
+                showPage('home');
+                document.getElementById('auth-modal').classList.remove('hidden');
+            } catch (error) {
+                console.error("Çıkış hatası:", error);
+                alert("Çıkış yapılırken bir hata oluştu.");
+            } finally {
+                hideLoading();
+            }
+        }
+    };
+
+    // --- Page Management ---
+    window.showPage = (pageId) => {
+        if (isLoading) return;
+        
+        showLoading();
+        
+        // Hide all pages
+        document.querySelectorAll('main > section').forEach(section => {
+            section.classList.add('hidden');
+        });
+        
+        // Show selected page
+        const pageElement = document.getElementById(`page-${pageId}`);
+        if (pageElement) {
+            pageElement.classList.remove('hidden');
+        } else {
+            if (pageId === 'profile') {
+                const container = document.getElementById('page-profile');
+                container.classList.remove('hidden');
+            }
+        }
+        
+        // Page-specific actions
+        setTimeout(() => {
+            try {
+                switch(pageId) {
+                    case 'home':
+                        loadRecentItems();
+                        break;
+                    case 'explore':
+                        loadExploreItems();
+                        break;
+                    case 'map-view':
+                        initTurkeyMap();
+                        loadMapItems();
+                        break;
+                    case 'profile':
+                        if (currentUser) {
+                            loadProfilePage();
+                        } else {
+                            showPage('home');
+                            document.getElementById('auth-modal').classList.remove('hidden');
+                        }
+                        break;
+                }
+            } catch (error) {
+                console.error(`Sayfa yükleme hatası (${pageId}):`, error);
+                alert("Sayfa yüklenirken bir hata oluştu.");
+            } finally {
+                hideLoading();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }, 300);
+    };
+
+    // --- Map Management ---
+    function initTurkeyMap() {
+        const mapElement = document.getElementById('turkey-map');
+        if (!mapElement) return;
+        
+        if (!turkeyMap) {
+            turkeyMap = L.map('turkey-map').setView([39.0, 35.0], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(turkeyMap);
+        }
+        
+        setTimeout(() => {
+            turkeyMap.invalidateSize();
+        }, 100);
+    }
+
+    window.showAllMarkers = () => {
+        clearMarkers();
+        loadMapItems();
+    };
+
+    window.filterMarkers = (type) => {
+        clearMarkers();
+        loadMapItems(type);
+    };
+
+    function clearMarkers() {
+        markers.forEach(marker => {
+            if (turkeyMap && marker) {
+                turkeyMap.removeLayer(marker);
+            }
+        });
+        markers = [];
+    }
+
+    function loadMapItems(filterType = 'all') {
+        const container = document.getElementById('map-items-list');
+        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="animate-spin w-8 h-8 border-2 border-charcoal/20 border-t-charcoal rounded-full mx-auto"></div></div>';
+        
+        onValue(ref(db, 'items'), (snapshot) => {
+            const items = [];
+            snapshot.forEach((child) => {
+                const item = child.val();
+                if (filterType === 'all' || item.type === filterType) {
+                    items.push(item);
+                }
+            });
+            
+            clearMarkers();
+            
+            items.forEach(item => {
+                if (item.lat && item.lng) {
+                    const markerColor = item.type === 'lost' ? '#dc2626' : '#059669';
+                    const iconColor = item.userId === currentUser?.uid ? '#8e8d8a' : markerColor;
+                    
+                    const markerIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div style="background-color: ${iconColor}; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                 <span class="material-symbols-outlined" style="color: white; font-size: 16px;">
+                                     ${item.type === 'lost' ? 'search' : 'check'}
+                                 </span>
+                               </div>`,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16]
+                    });
+                    
+                    const mapMarker = L.marker([item.lat, item.lng], { icon: markerIcon }).addTo(turkeyMap);
+                    
+                    // Create custom popup with "Detaylar" button
+                    const popupContent = `
+                        <div style="min-width: 250px; padding: 16px; font-family: 'Inter', sans-serif;">
+                            <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
+                                <div style="width: 60px; height: 60px; border-radius: 8px; overflow: hidden; flex-shrink: 0;">
+                                    <img src="${item.image}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                        <div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${item.type === 'lost' ? '#dc2626' : '#059669'}"></div>
+                                        <strong style="font-size: 14px; font-weight: 600;">${item.title}</strong>
+                                    </div>
+                                    <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">
+                                        ${item.description.substring(0, 80)}${item.description.length > 80 ? '...' : ''}
+                                    </p>
+                                </div>
+                            </div>
+                            <button onclick="window.showItemDetailPopup('${item.id}')" style="width: 100%; padding: 8px 16px; background: #1a1a1a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; transition: background 0.2s;" 
+                                    onmouseover="this.style.backgroundColor='#333'"
+                                    onmouseout="this.style.backgroundColor='#1a1a1a'">
+                                Detayları Gör
+                            </button>
+                        </div>
+                    `;
+                    
+                    mapMarker.bindPopup(popupContent);
+                    
+                    markers.push(mapMarker);
+                }
+            });
+            
+            if (markers.length > 0) {
+                const group = new L.featureGroup(markers);
+                turkeyMap.fitBounds(group.getBounds().pad(0.1));
+            }
+            
+            displayItems(items.slice(0, 6), container, true);
+            
+        }, (error) => {
+            console.error("Harita verisi yükleme hatası:", error);
+            container.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="material-symbols-outlined text-charcoal/40">error</span>
+                    </div>
+                    <p class="text-sm text-charcoal/40">Harita verileri yüklenirken bir hata oluştu.</p>
+                </div>
+            `;
+        });
+    }
+
+    // --- Quick Search ---
+    window.quickSearch = (keyword) => {
+        document.getElementById('search-keyword').value = keyword;
+        searchItems();
+    };
+
+    window.searchItems = () => {
+        const keyword = document.getElementById('search-keyword').value.toLowerCase();
+        
+        onValue(ref(db, 'items'), (snapshot) => {
+            const items = [];
+            snapshot.forEach((child) => {
+                const item = child.val();
+                const matchesKeyword = !keyword || 
+                    item.title.toLowerCase().includes(keyword) ||
+                    item.description.toLowerCase().includes(keyword);
+                
+                if (matchesKeyword) {
+                    items.push(item);
+                }
+            });
+            
+            items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            if (items.length === 0) {
+                alert("Arama kriterlerinize uygun ilan bulunamadı.");
+                return;
+            }
+            
+            showPage('explore');
+            displayItems(items, document.getElementById('explore-items'));
+        });
+    };
+
+    // --- Item Management ---
+    window.setAdType = (type) => {
+        adType = type;
+        const lostBtn = document.getElementById('type-lost');
+        const foundBtn = document.getElementById('type-found');
+        
+        if (type === 'lost') {
+            lostBtn.classList.add('border-lost-red', 'text-lost-red');
+            lostBtn.classList.remove('text-charcoal/60');
+            
+            foundBtn.classList.remove('border-found-green', 'text-found-green', 'hover:border-found-green', 'hover:text-found-green');
+            foundBtn.classList.add('border', 'thin-border', 'text-charcoal/60');
+        } else {
+            foundBtn.classList.add('border-found-green', 'text-found-green', 'hover:border-found-green', 'hover:text-found-green');
+            foundBtn.classList.remove('text-charcoal/60');
+            
+            lostBtn.classList.remove('border-lost-red', 'text-lost-red');
+            lostBtn.classList.add('border', 'thin-border', 'text-charcoal/60');
+        }
+    };
+
+    // Image upload handling
+    document.getElementById('file-input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Dosya boyutu 5MB'tan küçük olmalıdır.");
+            return;
+        }
+        
+        selectedImage = file;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const preview = document.getElementById('preview-img');
+            preview.src = event.target.result;
+            document.getElementById('image-preview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    window.saveAd = async () => {
+        if (!currentUser) {
+            alert("Lütfen önce giriş yapın.");
+            showPage('home');
+            document.getElementById('auth-modal').classList.remove('hidden');
+            return;
+        }
+        
+        const title = document.getElementById('add-title').value.trim();
+        const desc = document.getElementById('add-desc').value.trim();
+        const phone = document.getElementById('add-phone').value.trim();
+        
+        if (!title) {
+            alert("Lütfen başlık girin.");
+            return;
+        }
+        
+        if (!selectedImage) {
+            alert("Lütfen bir fotoğraf yükleyin.");
+            return;
+        }
+        
+        if (!phone) {
+            alert("Lütfen iletişim numarası girin.");
+            return;
+        }
+        
+        const btn = document.getElementById('save-btn');
+        const btnText = document.getElementById('save-btn-text');
+        const originalText = btnText.textContent;
+        btnText.textContent = "Yükleniyor...";
+        btn.disabled = true;
+        
+        showLoading();
+        
+        try {
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const base64Image = event.target.result;
+                
+                // Generate random coordinates in Turkey
+                const defaultLat = 39.0 + (Math.random() - 0.5) * 2;
+                const defaultLng = 35.0 + (Math.random() - 0.5) * 3;
+                
+                const newItemRef = push(ref(db, 'items'));
+                await set(newItemRef, {
+                    id: newItemRef.key,
+                    title,
+                    description: desc,
+                    phone,
+                    type: adType,
+                    image: base64Image,
+                    lat: defaultLat,
+                    lng: defaultLng,
+                    userId: currentUser.uid,
+                    userEmail: currentUser.email,
+                    userName: currentUser.displayName || currentUser.email.split('@')[0],
+                    status: 'active',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+                
+                // Reset form
+                document.getElementById('add-title').value = '';
+                document.getElementById('add-desc').value = '';
+                document.getElementById('add-phone').value = '';
+                document.getElementById('image-preview').classList.add('hidden');
+                selectedImage = null;
+                document.getElementById('file-input').value = '';
+                
+                alert("🎉 İlan başarıyla yayınlandı!");
+                showPage('home');
+                
+                btnText.textContent = originalText;
+                btn.disabled = false;
+                hideLoading();
+            };
+            reader.readAsDataURL(selectedImage);
+            
+        } catch (error) {
+            console.error("İlan kaydetme hatası:", error);
+            alert("İlan kaydedilirken bir hata oluştu.");
+            btnText.textContent = originalText;
+            btn.disabled = false;
+            hideLoading();
+        }
+    };
+
+    // --- Item Display ---
+    function loadRecentItems() {
+        const container = document.getElementById('recent-items');
+        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="animate-spin w-8 h-8 border-2 border-charcoal/20 border-t-charcoal rounded-full mx-auto"></div></div>';
+        
+        onValue(ref(db, 'items'), (snapshot) => {
+            const items = [];
+            snapshot.forEach((child) => {
+                const item = child.val();
+                items.push(item);
+            });
+            
+            items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const recentItems = items.slice(0, 3);
+            
+            displayItems(recentItems, container);
+        }, (error) => {
+            console.error("Veri yükleme hatası:", error);
+            container.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="material-symbols-outlined text-charcoal/40">error</span>
+                    </div>
+                    <p class="text-sm text-charcoal/40">İlanlar yüklenirken bir hata oluştu.</p>
+                </div>
+            `;
+        });
+    }
+
+    window.loadExploreItems = () => {
+        const container = document.getElementById('explore-items');
+        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="animate-spin w-8 h-8 border-2 border-charcoal/20 border-t-charcoal rounded-full mx-auto"></div></div>';
+        
+        onValue(ref(db, 'items'), (snapshot) => {
+            const items = [];
+            snapshot.forEach((child) => {
+                const item = child.val();
+                if (currentFilter === 'all' || item.type === currentFilter) {
+                    items.push(item);
+                }
+            });
+            
+            items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            displayItems(items, container);
+        });
+    };
+
+    function displayItems(items, container, fromMap = false) {
+        if (items.length === 0) {
+            container.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="material-symbols-outlined text-charcoal/40">search_off</span>
+                    </div>
+                    <p class="text-sm text-charcoal/40">Henüz ilan bulunmuyor.</p>
+                    <button onclick="showPage('add')" class="mt-3 px-4 py-1.5 bg-charcoal text-white text-xs rounded-lg">
+                        İlk İlanı Sen Ver
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = items.map(item => `
+            <div class="group cursor-pointer" onclick="showItemDetailPopup('${item.id}')">
+                <div class="relative aspect-[4/5] overflow-hidden thin-border bg-white">
+                    <img src="${item.image}" alt="${item.title}" class="h-full w-full object-cover grayscale-[0.3] group-hover:scale-[1.02] transition-transform duration-700">
+                    <div class="absolute top-6 left-6">
+                        <span class="px-3 py-1 bg-white/90 backdrop-blur-sm text-[10px] uppercase tracking-[0.2em] font-medium ${item.type === 'lost' ? 'text-lost-red' : 'text-found-green'}">
+                            ${item.type === 'lost' ? 'Lost' : 'Found'}
+                        </span>
+                    </div>
+                    ${fromMap ? `<div class="absolute bottom-6 right-6">
+                        <button onclick="event.stopPropagation(); showItemDetailPopup('${item.id}')" class="size-8 bg-charcoal/80 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-charcoal transition">
+                            <span class="material-symbols-outlined text-sm">visibility</span>
+                        </button>
+                    </div>` : ''}
+                </div>
+                <div class="mt-6 flex justify-between items-start">
+                    <div>
+                        <h3 class="text-xl font-serif font-light italic">${item.title}</h3>
+                        <p class="text-[11px] text-charcoal/40 uppercase tracking-widest mt-1">
+                            ${item.phone ? '📞 ' + item.phone : 'İletişim yok'}
+                        </p>
+                        <p class="text-xs text-charcoal/30 mt-2 line-clamp-2">${item.description || 'Açıklama yok'}</p>
+                    </div>
+                    <span class="text-[10px] text-charcoal/30">${formatDate(item.createdAt)}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // --- Item Detail Popup ---
+    window.showItemDetailPopup = async (itemId) => {
+        showLoading();
+        try {
+            const snapshot = await get(ref(db, `items/${itemId}`));
+            if (!snapshot.exists()) {
+                alert("İlan bulunamadı.");
+                hideLoading();
+                return;
+            }
+            
+            const item = snapshot.val();
+            
+            const detailModal = document.getElementById('detail-modal');
+            const detailContent = detailModal.querySelector('.detail-popup');
+            
+            detailContent.innerHTML = `
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h2 class="text-2xl font-serif font-light italic mb-2">${item.title}</h2>
+                            <div class="flex items-center gap-3">
+                                <span class="px-3 py-1 ${item.type === 'lost' ? 'bg-lost-red/10 text-lost-red' : 'bg-found-green/10 text-found-green'} text-xs uppercase tracking-widest rounded">
+                                    ${item.type === 'lost' ? 'Lost' : 'Found'}
+                                </span>
+                                <span class="text-sm text-charcoal/40">${formatDate(item.createdAt)}</span>
+                            </div>
+                        </div>
+                        <button onclick="closeDetailModal()" class="p-2 hover:bg-charcoal/5 rounded-lg transition">
+                            <span class="material-symbols-outlined text-charcoal/60">close</span>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <div class="aspect-square overflow-hidden rounded-xl thin-border bg-white mb-4">
+                                <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-off-white rounded-lg">
+                                <div class="size-10 rounded-full bg-charcoal/5 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-charcoal/60">person</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium">${item.userName || 'Kullanıcı'}</p>
+                                    <p class="text-xs text-charcoal/40">${item.userEmail || ''}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="mb-4">
+                                <h3 class="font-medium text-charcoal/60 mb-2 text-sm uppercase tracking-widest">Description</h3>
+                                <p class="text-charcoal whitespace-pre-line">${item.description || 'Açıklama yok'}</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h3 class="font-medium text-charcoal/60 mb-2 text-sm uppercase tracking-widest">Contact</h3>
+                                <div class="flex items-center gap-2 p-3 bg-off-white rounded-lg">
+                                    <span class="material-symbols-outlined text-charcoal/60">call</span>
+                                    <span class="font-medium">${item.phone || 'İletişim numarası yok'}</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="font-medium text-charcoal/60 mb-2 text-sm uppercase tracking-widest">Location</h3>
+                                <div id="detail-map-mini" class="map-mini bg-charcoal/5"></div>
+                                <p class="text-xs text-charcoal/40 mt-2">📍 Konum: ${item.lat?.toFixed(4) || '0'}, ${item.lng?.toFixed(4) || '0'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${currentUser && item.userId === currentUser.uid && item.type === 'lost' ? `
+                        <div class="pt-6 border-t thin-border flex gap-3">
+                            <button onclick="markAsFound('${itemId}')" 
+                                    class="flex-1 py-3 bg-found-green text-white font-medium rounded-lg hover:bg-found-green/90 transition">
+                                ✅ Bulundu Olarak İşaretle
+                            </button>
+                            <button onclick="deleteItem('${itemId}')" 
+                                    class="flex-1 py-3 bg-lost-red text-white font-medium rounded-lg hover:bg-lost-red/90 transition">
+                                🗑️ İlanı Sil
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            detailModal.classList.remove('hidden');
+            
+            // Initialize mini map
+            setTimeout(() => {
+                const miniMap = L.map('detail-map-mini').setView([item.lat || 39.0, item.lng || 35.0], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(miniMap);
+                
+                const miniMarker = L.marker([item.lat || 39.0, item.lng || 35.0], {
+                    icon: L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div style="background-color: ${item.type === 'lost' ? '#dc2626' : '#059669'}; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;">
+                                 <span class="material-symbols-outlined" style="color: white; font-size: 16px;">
+                                     ${item.type === 'lost' ? 'search' : 'check'}
+                                 </span>
+                               </div>`,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16]
+                    })
+                }).addTo(miniMap);
+                
+                miniMap.invalidateSize();
+            }, 100);
+            
+            hideLoading();
+            
+        } catch (error) {
+            console.error("Detay yükleme hatası:", error);
+            alert("İlan detayları yüklenirken bir hata oluştu.");
+            hideLoading();
+        }
+    };
+
+    window.closeDetailModal = () => {
+        document.getElementById('detail-modal').classList.add('hidden');
+    };
+
+    window.markAsFound = async (itemId) => {
+        if (confirm("Bu ilanı bulundu olarak işaretlemek istediğinize emin misiniz?")) {
+            showLoading();
+            try {
+                await update(ref(db, `items/${itemId}`), {
+                    type: 'found',
+                    updatedAt: new Date().toISOString()
+                });
+                alert("✅ Başarıyla güncellendi!");
+                closeDetailModal();
+                if (document.getElementById('page-profile').classList.contains('hidden')) {
+                    showPage('explore');
+                } else {
+                    loadProfilePage();
+                }
+            } catch (error) {
+                console.error("Güncelleme hatası:", error);
+                alert("Güncelleme sırasında bir hata oluştu.");
+            } finally {
+                hideLoading();
+            }
+        }
+    };
+
+    window.deleteItem = async (itemId) => {
+        if (confirm("Bu ilanı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")) {
+            showLoading();
+            try {
+                await remove(ref(db, `items/${itemId}`));
+                alert("🗑️ İlan başarıyla silindi!");
+                closeDetailModal();
+                if (document.getElementById('page-profile').classList.contains('hidden')) {
+                    showPage('explore');
+                } else {
+                    loadProfilePage();
+                }
+            } catch (error) {
+                console.error("Silme hatası:", error);
+                alert("İlan silinirken bir hata oluştu.");
+            } finally {
+                hideLoading();
+            }
+        }
+    };
+
+    // --- Profile Management ---
+    function loadProfilePage() {
+        const container = document.getElementById('profile-content');
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-12">
+                <div class="animate-spin w-8 h-8 border-2 border-charcoal/20 border-t-charcoal rounded-full mb-3"></div>
+                <p class="text-sm text-charcoal/40">Yükleniyor...</p>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            showProfile(currentUser.uid);
+        }, 300);
+    }
+
+    window.showProfile = async (userId) => {
+        showLoading();
+        try {
+            const userSnap = await get(ref(db, `users/${userId}`));
+            const userData = userSnap.val();
+            
+            const itemsSnap = await get(ref(db, 'items'));
+            const userItems = [];
+            itemsSnap.forEach((child) => {
+                const item = child.val();
+                if (item.userId === userId) {
+                    userItems.push(item);
+                }
+            });
+            
+            const container = document.getElementById('profile-content');
+            
+            userItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            const totalAds = userItems.length;
+            const lostAds = userItems.filter(item => item.type === 'lost').length;
+            const foundAds = userItems.filter(item => item.type === 'found').length;
+            
+            container.innerHTML = `
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h2 class="text-3xl font-serif font-light italic mb-2">${userData?.name || 'Kullanıcı'}</h2>
+                            <p class="text-sm text-charcoal/40">${userData?.email || currentUser?.email || ''}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openEditModal()" class="px-4 py-2 bg-charcoal text-white text-xs rounded-lg">
+                                Profili Düzenle
+                            </button>
+                            <button onclick="logout()" class="px-4 py-2 bg-lost-red text-white text-xs rounded-lg">
+                                Çıkış Yap
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-3 mb-8">
+                        <div class="bg-off-white p-4 rounded-lg text-center">
+                            <p class="text-xs text-charcoal/40 uppercase tracking-widest mb-1">Total</p>
+                            <p class="text-2xl font-light">${totalAds}</p>
+                        </div>
+                        <div class="bg-lost-red/5 p-4 rounded-lg text-center">
+                            <p class="text-xs text-charcoal/40 uppercase tracking-widest mb-1">Lost</p>
+                            <p class="text-2xl font-light text-lost-red">${lostAds}</p>
+                        </div>
+                        <div class="bg-found-green/5 p-4 rounded-lg text-center">
+                            <p class="text-xs text-charcoal/40 uppercase tracking-widest mb-1">Found</p>
+                            <p class="text-2xl font-light text-found-green">${foundAds}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-serif font-light">My Items</h3>
+                            <button onclick="showPage('add')" class="px-3 py-1.5 bg-charcoal text-white text-xs rounded-lg">
+                                + New Item
+                            </button>
+                        </div>
+                        
+                        <div id="prof-ads" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${userItems.length > 0 ? userItems.map(item => `
+                                <div class="bg-white rounded-lg overflow-hidden thin-border cursor-pointer hover:shadow-sm transition" onclick="showItemDetailPopup('${item.id}')">
+                                    <div class="relative h-48 bg-charcoal/5">
+                                        <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
+                                        <div class="absolute top-2 left-2">
+                                            <span class="px-2 py-0.5 ${item.type === 'lost' ? 'bg-lost-red/10 text-lost-red' : 'bg-found-green/10 text-found-green'} text-[10px] uppercase tracking-widest rounded">
+                                                ${item.type === 'lost' ? 'Lost' : 'Found'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="p-3">
+                                        <h4 class="font-medium text-sm mb-1 line-clamp-1">${item.title}</h4>
+                                        <p class="text-xs text-charcoal/40 mb-2 line-clamp-2">${item.description?.substring(0, 60) || ''}</p>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs text-charcoal/30">${formatDate(item.createdAt)}</span>
+                                            ${item.type === 'lost' ? `
+                                                <button onclick="event.stopPropagation(); markAsFound('${item.id}')" 
+                                                        class="px-2 py-1 bg-found-green/10 text-found-green text-xs rounded hover:bg-found-green/20 transition">
+                                                    ✅ Bulundu
+                                                </button>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('') : `
+                                <div class="col-span-full text-center py-12">
+                                    <div class="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <span class="material-symbols-outlined text-charcoal/40">inbox</span>
+                                    </div>
+                                    <p class="text-sm text-charcoal/40 mb-3">Henüz ilan bulunmuyor.</p>
+                                    <button onclick="showPage('add')" class="px-4 py-2 bg-charcoal text-white text-xs rounded-lg">
+                                        İlk İlanını Ver
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            hideLoading();
+            
+        } catch (error) {
+            console.error("Profil yükleme hatası:", error);
+            container.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="material-symbols-outlined text-charcoal/40">error</span>
+                    </div>
+                    <p class="text-sm text-charcoal/40">Profil yüklenirken bir hata oluştu.</p>
+                </div>
+            `;
+            hideLoading();
+        }
+    };
+
+    window.openEditModal = async () => {
+        // Bu fonksiyon daha önceki koddan alınabilir
+        alert("Profil düzenleme özelliği yakında eklenecek!");
+    };
+
+    // --- Search and Filter ---
+    window.setFilter = (filter) => {
+        currentFilter = filter;
+        
+        // Update filter button styles
+        ['lost', 'found', 'all'].forEach(f => {
+            const btn = document.getElementById(`filter-${f}`);
+            if (btn) {
+                if (f === filter) {
+                    btn.classList.remove('bg-off-white', 'text-lost-red', 'text-found-green', 'border', 'thin-border');
+                    btn.classList.add('bg-charcoal', 'text-white');
+                } else if (f === 'lost') {
+                    btn.classList.remove('bg-charcoal', 'text-white', 'bg-off-white', 'text-found-green', 'border', 'thin-border');
+                    btn.classList.add('bg-off-white', 'text-lost-red', 'border', 'thin-border');
+                } else if (f === 'found') {
+                    btn.classList.remove('bg-charcoal', 'text-white', 'bg-off-white', 'text-lost-red', 'border', 'thin-border');
+                    btn.classList.add('bg-off-white', 'text-found-green', 'border', 'thin-border');
+                }
+            }
+        });
+        
+        loadExploreItems();
+    };
+
+    // --- Utility Functions ---
+    function formatDate(dateString) {
+        if (!dateString) return 'Tarih yok';
+        
+        const date = new Date(dateString);
+        const now = new Date();
+        const diff = now - date;
+        
+        if (isNaN(diff)) return 'Tarih yok';
+        
+        if (diff < 60000) return 'Az önce';
+        if (diff < 3600000) return `${Math.floor(diff / 60000)} dakika önce`;
+        if (diff < 86400000) return `${Math.floor(diff / 3600000)} saat önce`;
+        if (diff < 604800000) return `${Math.floor(diff / 86400000)} gün önce`;
+        
+        return date.toLocaleDateString('tr-TR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    }
+
+    // --- Auth State Listener ---
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        
+        if (user) {
+            document.getElementById('auth-modal').classList.add('hidden');
+            
+            document.getElementById('header-profile').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <button onclick="showPage('profile')" class="size-8 overflow-hidden rounded-full ring-1 ring-charcoal/5">
+                        <img id="header-profile-img" class="h-full w-full object-cover grayscale opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHgmz9ZdyrrnVStj22LkErbA8T2RxayfdXNwm9XagSatARcd3ffXC_gnMjwdMeTVIM1_naprdoDBH5E3oQbSpPToZ9pFGChkcvGo7fUPwhQIeIDqqxkhg_0GG1S_EIbuKM63LbIbQBaMofSj_XkXehUr35iKp9AOfl7D_5tV9hf9L31MrtXPhZTrnFNVIgStVmeBJPzZwRvfbNPNyWtRAxeHdGww_HnK4TbZVi8SjQ246qUt_7_Kf_MPPuOxI2yvPYY3om-iE61Vc">
+                    </button>
+                </div>
+            `;
+            
+            get(ref(db, `users/${user.uid}`)).then((snap) => {
+                const userData = snap.val();
+                if (userData?.profileImage) {
+                    document.getElementById('header-profile-img').src = userData.profileImage;
+                }
+            });
+            
+            loadRecentItems();
+            
+        } else {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            document.getElementById('header-profile').innerHTML = `
+                <button onclick="document.getElementById('auth-modal').classList.remove('hidden')"
+                        class="px-4 py-2 bg-charcoal text-white text-xs font-medium rounded-lg">
+                    Giriş Yap
+                </button>
+            `;
+        }
+    });
+
+</script>
+</body>
+</html>
