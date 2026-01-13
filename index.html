@@ -92,6 +92,20 @@
             color: white;
         }
         
+        /* Image optimization for PC */
+        .item-image {
+            height: 60vh;
+            max-height: 500px;
+            object-fit: cover;
+        }
+        
+        @media (max-width: 768px) {
+            .item-image {
+                height: 70vh;
+                max-height: 400px;
+            }
+        }
+        
         /* Leaflet map fixes */
         .leaflet-container {
             font-family: 'Inter', sans-serif !important;
@@ -111,6 +125,11 @@
         
         .custom-popup .leaflet-popup-tip {
             background: white;
+        }
+        
+        /* FIX: Ensure popup is above everything */
+        .leaflet-popup {
+            z-index: 9999 !important;
         }
         
         /* Item detail popup */
@@ -140,6 +159,35 @@
         .bottom-nav-blur {
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
+        }
+        
+        /* Grid optimization for PC */
+        @media (min-width: 1024px) {
+            .items-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 2rem;
+            }
+            
+            .item-card {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+        
+        @media (min-width: 1280px) {
+            .items-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* Fix for map popup overlapping */
+        .leaflet-pane {
+            z-index: 400;
+        }
+        
+        .leaflet-top,
+        .leaflet-bottom {
+            z-index: 999;
         }
     </style>
 </head>
@@ -195,7 +243,7 @@
 </div>
 
 <!-- Item Detail Popup -->
-<div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 fade-in hidden">
+<div id="detail-modal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 fade-in hidden">
     <div class="detail-popup bg-white rounded-2xl overflow-hidden shadow-2xl slide-up max-h-[90vh] overflow-y-auto">
         <!-- Content will be loaded here -->
     </div>
@@ -214,48 +262,38 @@
 
 <!-- Main Content -->
 <main class="flex-1 pb-32">
-    <!-- Home Page -->
+    <!-- Ana Sayfa -->
     <section id="page-home" class="space-y-12 fade-in">
         <!-- Hero Section -->
         <section class="px-8 pt-8 pb-12 text-center">
-            <h1 class="text-[44px] leading-tight font-serif font-light italic mb-4">Finding the lost.</h1>
-            <p class="text-charcoal/40 font-light text-sm tracking-widest uppercase">A curated lost & found platform</p>
+            <h1 class="text-[44px] leading-tight font-serif font-light italic mb-4">Kayıp olanı bul.</h1>
+            <p class="text-charcoal/40 font-light text-sm tracking-widest uppercase">Özenle seçilmiş kayıp & buluntu platformu</p>
         </section>
         
-        <!-- Search Section -->
+        <!-- Arama Bölümü -->
         <div class="px-8 mb-12">
             <div class="relative max-w-md mx-auto">
-                <input type="text" id="search-keyword" placeholder="What was left behind?"
-                       class="w-full h-14 bg-white border-none rounded-full px-8 text-sm focus:ring-0 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all placeholder:text-charcoal/20">
+                <input type="text" id="search-keyword" placeholder="Neyi kaybettiniz veya buldunuz?"
+                       class="w-full h-14 bg-white border-none rounded-full px-8 text-sm focus:ring-0 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all placeholder:text-charcoal/20"
+                       onkeypress="handleSearchEnter(event)">
                 <div class="absolute right-4 top-1/2 -translate-y-1/2">
                     <button onclick="searchItems()" class="size-10 flex items-center justify-center bg-charcoal text-off-white rounded-full scale-90 hover:scale-100 transition">
-                        <span class="material-symbols-outlined text-lg font-extralight">east</span>
+                        <span class="material-symbols-outlined text-lg font-extralight">search</span>
                     </button>
                 </div>
             </div>
         </div>
         
-        <!-- Quick Categories -->
-        <div class="px-8 mb-16">
-            <div class="flex overflow-x-auto gap-6 scrollbar-hide py-2 border-y border-charcoal/5">
-                <button onclick="quickSearch('köpek')" class="whitespace-nowrap text-[11px] uppercase tracking-[0.2em] font-medium text-charcoal/60 hover:text-charcoal transition-colors">Köpek</button>
-                <button onclick="quickSearch('kedi')" class="whitespace-nowrap text-[11px] uppercase tracking-[0.2em] font-medium text-charcoal/60 hover:text-charcoal transition-colors">Kedi</button>
-                <button onclick="quickSearch('cüzdan')" class="whitespace-nowrap text-[11px] uppercase tracking-[0.2em] font-medium text-charcoal/60 hover:text-charcoal transition-colors">Cüzdan</button>
-                <button onclick="quickSearch('telefon')" class="whitespace-nowrap text-[11px] uppercase tracking-[0.2em] font-medium text-charcoal/60 hover:text-charcoal transition-colors">Telefon</button>
-                <button onclick="quickSearch('anahtar')" class="whitespace-nowrap text-[11px] uppercase tracking-[0.2em] font-medium text-charcoal/60 hover:text-charcoal transition-colors">Anahtar</button>
-            </div>
-        </div>
-        
-        <!-- Recent Items -->
+        <!-- Son İlanlar -->
         <div class="px-6 space-y-8">
             <div class="flex items-end justify-between px-2">
-                <h2 class="text-3xl font-serif font-light">Latest Registry</h2>
-                <button onclick="showPage('explore')" class="text-[10px] uppercase tracking-widest text-charcoal/40 pb-1 border-b border-charcoal/20 hover:text-charcoal transition">Archive</button>
+                <h2 class="text-3xl font-serif font-light">Son Kayıtlar</h2>
+                <button onclick="showPage('explore')" class="text-[10px] uppercase tracking-widest text-charcoal/40 pb-1 border-b border-charcoal/20 hover:text-charcoal transition">Tümünü Gör</button>
             </div>
             
-            <div id="recent-items" class="grid grid-cols-1 gap-12">
-                <!-- Items will be loaded here -->
-                <div class="text-center py-12">
+            <div id="recent-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-grid">
+                <!-- İlanlar buraya yüklenecek -->
+                <div class="text-center py-12 col-span-full">
                     <div class="flex flex-col items-center gap-4">
                         <div class="w-12 h-12 border-2 border-charcoal/20 border-t-charcoal rounded-full animate-spin"></div>
                         <p class="text-sm text-charcoal/40">Yükleniyor...</p>
@@ -265,30 +303,30 @@
         </div>
     </section>
     
-    <!-- Explore Page -->
+    <!-- Keşfet Sayfası -->
     <section id="page-explore" class="hidden px-6 space-y-12">
         <div class="flex items-end justify-between px-2 pt-8">
-            <h2 class="text-3xl font-serif font-light">All Items</h2>
+            <h2 class="text-3xl font-serif font-light">Tüm İlanlar</h2>
             <div class="flex gap-2">
-                <button onclick="setFilter('all')" id="filter-all" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-charcoal text-white rounded">All</button>
-                <button onclick="setFilter('lost')" id="filter-lost" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-off-white text-lost-red border thin-border rounded">Lost</button>
-                <button onclick="setFilter('found')" id="filter-found" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-off-white text-found-green border thin-border rounded">Found</button>
+                <button onclick="setFilter('all')" id="filter-all" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-charcoal text-white rounded">Tümü</button>
+                <button onclick="setFilter('lost')" id="filter-lost" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-off-white text-lost-red border thin-border rounded">Kayıp</button>
+                <button onclick="setFilter('found')" id="filter-found" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-off-white text-found-green border thin-border rounded">Bulunan</button>
             </div>
         </div>
         
-        <div id="explore-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Items will be loaded here -->
+        <div id="explore-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-grid">
+            <!-- İlanlar buraya yüklenecek -->
         </div>
     </section>
     
-    <!-- Map View Page -->
+    <!-- Harita Görünümü -->
     <section id="page-map-view" class="hidden px-4 space-y-8">
         <div class="flex items-end justify-between px-2 pt-8">
-            <h2 class="text-3xl font-serif font-light">Map View</h2>
+            <h2 class="text-3xl font-serif font-light">Harita Görünümü</h2>
             <div class="flex gap-2">
-                <button onclick="showAllMarkers()" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-charcoal text-white rounded">All</button>
-                <button onclick="filterMarkers('lost')" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-off-white text-lost-red border thin-border rounded">Lost</button>
-                <button onclick="filterMarkers('found')" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-off-white text-found-green border thin-border rounded">Found</button>
+                <button onclick="showAllMarkers()" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-charcoal text-white rounded">Tümü</button>
+                <button onclick="filterMarkers('lost')" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-off-white text-lost-red border thin-border rounded">Kayıp</button>
+                <button onclick="filterMarkers('found')" class="px-3 py-1 text-[10px] uppercase tracking-widest bg-off-white text-found-green border thin-border rounded">Bulunan</button>
             </div>
         </div>
         
@@ -296,64 +334,64 @@
             <div id="turkey-map" class="h-64 md:h-80 w-full"></div>
         </div>
         
-        <div id="map-items-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Map items will be loaded here -->
+        <div id="map-items-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-grid">
+            <!-- Harita öğeleri buraya yüklenecek -->
         </div>
     </section>
     
-    <!-- Add Item Page -->
+    <!-- İlan Ekle Sayfası -->
     <section id="page-add" class="hidden">
         <div class="max-w-lg mx-auto px-6 py-8">
             <div class="mb-8">
-                <h2 class="text-3xl font-serif font-light mb-2">Create New</h2>
-                <p class="text-sm text-charcoal/40">Share lost or found items with the community</p>
+                <h2 class="text-3xl font-serif font-light mb-2">Yeni İlan Oluştur</h2>
+                <p class="text-sm text-charcoal/40">Kayıp veya buluntu ilanınızı toplulukla paylaşın</p>
             </div>
             
             <div class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Item Type</label>
+                    <label class="block text-sm font-medium text-charcoal/60 mb-2">İlan Türü</label>
                     <div class="grid grid-cols-2 gap-3">
                         <button id="type-lost" onclick="setAdType('lost')" class="py-4 rounded-lg bg-white border thin-border text-lost-red font-medium hover:border-lost-red transition">
                             <span class="flex items-center justify-center gap-2">
                                 <span class="material-symbols-outlined text-sm">search</span>
-                                Lost
+                                Kayıp
                             </span>
                         </button>
                         <button id="type-found" onclick="setAdType('found')" class="py-4 rounded-lg bg-white border thin-border text-charcoal/60 font-medium hover:border-found-green hover:text-found-green transition">
                             <span class="flex items-center justify-center gap-2">
                                 <span class="material-symbols-outlined text-sm">check_circle</span>
-                                Found
+                                Bulundu
                             </span>
                         </button>
                     </div>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Title</label>
-                    <input type="text" id="add-title" placeholder="Golden Retriever lost, Wallet found..." 
+                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Başlık</label>
+                    <input type="text" id="add-title" placeholder="Golden Retriever kayıp, Cüzdan bulundu..." 
                            class="w-full px-4 py-3 bg-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Description</label>
-                    <textarea id="add-desc" rows="3" placeholder="Detailed description (features, last seen location, contact information etc.)..." 
+                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Açıklama</label>
+                    <textarea id="add-desc" rows="3" placeholder="Detaylı açıklama (özellikler, son görüldüğü yer, iletişim bilgileri vb.)..." 
                               class="w-full px-4 py-3 bg-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm resize-none"></textarea>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Contact Number</label>
+                    <label class="block text-sm font-medium text-charcoal/60 mb-2">İletişim Numarası</label>
                     <input type="tel" id="add-phone" placeholder="+90 555 123 45 67" 
                            class="w-full px-4 py-3 bg-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Photo</label>
+                    <label class="block text-sm font-medium text-charcoal/60 mb-2">Fotoğraf</label>
                     <div onclick="document.getElementById('file-input').click()" class="border-2 border-dashed border-charcoal/10 rounded-lg p-8 text-center cursor-pointer hover:border-charcoal/20 transition bg-white">
                         <div class="w-12 h-12 mx-auto mb-3 bg-charcoal/5 rounded-full flex items-center justify-center">
                             <span class="material-symbols-outlined text-charcoal/40">photo_camera</span>
                         </div>
-                        <p class="text-sm text-charcoal/60">Click to upload photo</p>
-                        <p class="text-xs text-charcoal/40 mt-1">PNG, JPG (Max. 5MB)</p>
+                        <p class="text-sm text-charcoal/60">Fotoğraf yüklemek için tıklayın</p>
+                        <p class="text-xs text-charcoal/40 mt-1">PNG, JPG (Maks. 5MB)</p>
                         <input type="file" id="file-input" class="hidden" accept="image/*">
                     </div>
                     <div id="image-preview" class="mt-4 hidden">
@@ -363,21 +401,21 @@
                 
                 <button onclick="saveAd()" id="save-btn" 
                         class="w-full py-3 bg-charcoal text-white font-medium rounded-lg hover:bg-charcoal/90 transition text-sm">
-                    <span id="save-btn-text">Publish Item</span>
+                    <span id="save-btn-text">İlanı Yayınla</span>
                 </button>
             </div>
         </div>
     </section>
     
-    <!-- Profile Page -->
+    <!-- Profil Sayfası -->
     <section id="page-profile" class="hidden">
         <div id="profile-content" class="max-w-4xl mx-auto px-6 py-8">
-            <!-- Profile content will be loaded here -->
+            <!-- Profil içeriği buraya yüklenecek -->
         </div>
     </section>
 </main>
 
-<!-- Bottom Navigation -->
+<!-- Alt Navigasyon -->
 <nav class="fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-4 bottom-nav-blur bg-gradient-to-t from-off-white via-off-white/95 to-transparent">
     <div class="flex items-center justify-around h-16 bg-charcoal rounded-full px-6 shadow-2xl">
         <button data-page="home" class="text-off-white hover:text-off-white/80 transition-colors">
@@ -425,6 +463,7 @@
     let markers = [];
     let selectedImage = null;
     let isLoading = false;
+    let currentPopup = null;
 
     // --- Loading Overlay ---
     function showLoading() {
@@ -452,19 +491,19 @@
         });
     }
 
+    // --- Enter tuşu ile arama ---
+    window.handleSearchEnter = (event) => {
+        if (event.key === 'Enter') {
+            searchItems();
+        }
+    };
+
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
         setupBottomNavigation();
         showPage('home');
         setAdType('lost');
         setFilter('all');
-        
-        // Initialize map after a delay
-        setTimeout(() => {
-            if (document.getElementById('turkey-map')) {
-                initTurkeyMap();
-            }
-        }, 1000);
     });
 
     // --- Authentication ---
@@ -547,6 +586,15 @@
         
         showLoading();
         
+        // Close detail modal if open
+        closeDetailModal();
+        
+        // Close any open map popup
+        if (currentPopup && turkeyMap) {
+            turkeyMap.closePopup(currentPopup);
+            currentPopup = null;
+        }
+        
         // Hide all pages
         document.querySelectorAll('main > section').forEach(section => {
             section.classList.add('hidden');
@@ -602,10 +650,38 @@
         if (!mapElement) return;
         
         if (!turkeyMap) {
+            // Türkiye merkezli, sadece Türkiye'yi gösteren harita
             turkeyMap = L.map('turkey-map').setView([39.0, 35.0], 6);
+            
+            // Türkiye sınırlarını kısıtla
+            turkeyMap.setMaxBounds([
+                [35.8, 25.6], // Güneybatı
+                [42.1, 44.8]  // Kuzeydoğu
+            ]);
+            
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
+                attribution: '© OpenStreetMap contributors',
+                minZoom: 6,
+                maxZoom: 12
             }).addTo(turkeyMap);
+            
+            // Haritada tıklanınca açık popup'ı kapat
+            turkeyMap.on('click', (e) => {
+                if (currentPopup && turkeyMap) {
+                    turkeyMap.closePopup(currentPopup);
+                    currentPopup = null;
+                }
+            });
+            
+            // Popup açıldığında referansını sakla
+            turkeyMap.on('popupopen', (e) => {
+                currentPopup = e.popup;
+            });
+            
+            // Popup kapandığında referansı temizle
+            turkeyMap.on('popupclose', () => {
+                currentPopup = null;
+            });
         }
         
         setTimeout(() => {
@@ -665,7 +741,6 @@
                     
                     const mapMarker = L.marker([item.lat, item.lng], { icon: markerIcon }).addTo(turkeyMap);
                     
-                    // Create custom popup with "Detaylar" button
                     const popupContent = `
                         <div style="min-width: 250px; padding: 16px; font-family: 'Inter', sans-serif;">
                             <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
@@ -682,7 +757,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <button onclick="window.showItemDetailPopup('${item.id}')" style="width: 100%; padding: 8px 16px; background: #1a1a1a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; transition: background 0.2s;" 
+                            <button onclick="window.handleMapPopupDetail('${item.id}')" style="width: 100%; padding: 8px 16px; background: #1a1a1a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; transition: background 0.2s;" 
                                     onmouseover="this.style.backgroundColor='#333'"
                                     onmouseout="this.style.backgroundColor='#1a1a1a'">
                                 Detayları Gör
@@ -690,7 +765,15 @@
                         </div>
                     `;
                     
-                    mapMarker.bindPopup(popupContent);
+                    const popup = L.popup({
+                        className: 'custom-popup',
+                        closeButton: true,
+                        autoClose: false,
+                        closeOnClick: false,
+                        maxWidth: 300
+                    }).setContent(popupContent);
+                    
+                    mapMarker.bindPopup(popup);
                     
                     markers.push(mapMarker);
                 }
@@ -699,6 +782,9 @@
             if (markers.length > 0) {
                 const group = new L.featureGroup(markers);
                 turkeyMap.fitBounds(group.getBounds().pad(0.1));
+            } else {
+                // Türkiye'yi göster
+                turkeyMap.setView([39.0, 35.0], 6);
             }
             
             displayItems(items.slice(0, 6), container, true);
@@ -716,22 +802,73 @@
         });
     }
 
-    // --- Quick Search ---
-    window.quickSearch = (keyword) => {
-        document.getElementById('search-keyword').value = keyword;
-        searchItems();
+    // Map popup detayını göster
+    window.handleMapPopupDetail = (itemId) => {
+        if (currentPopup && turkeyMap) {
+            turkeyMap.closePopup(currentPopup);
+            currentPopup = null;
+        }
+        showItemDetailPopup(itemId);
     };
 
+    // --- Arama ---
     window.searchItems = () => {
-        const keyword = document.getElementById('search-keyword').value.toLowerCase();
+        const keyword = document.getElementById('search-keyword').value.toLowerCase().trim();
+        
+        if (!keyword) {
+            alert("Lütfen arama yapmak için bir kelime girin.");
+            return;
+        }
+        
+        showLoading();
         
         onValue(ref(db, 'items'), (snapshot) => {
             const items = [];
             snapshot.forEach((child) => {
                 const item = child.val();
-                const matchesKeyword = !keyword || 
-                    item.title.toLowerCase().includes(keyword) ||
-                    item.description.toLowerCase().includes(keyword);
+                
+                // Geliştirilmiş arama algoritması
+                const titleMatch = item.title?.toLowerCase().includes(keyword) || false;
+                const descMatch = item.description?.toLowerCase().includes(keyword) || false;
+                const phoneMatch = item.phone?.toLowerCase().includes(keyword) || false;
+                
+                // Türkçe karakter desteği için alternatif arama
+                const turkishKeyword = keyword
+                    .replace(/ı/g, 'i')
+                    .replace(/İ/g, 'i')
+                    .replace(/ğ/g, 'g')
+                    .replace(/Ğ/g, 'g')
+                    .replace(/ş/g, 's')
+                    .replace(/Ş/g, 's')
+                    .replace(/ç/g, 'c')
+                    .replace(/Ç/g, 'c')
+                    .replace(/ü/g, 'u')
+                    .replace(/Ü/g, 'u')
+                    .replace(/ö/g, 'o')
+                    .replace(/Ö/g, 'o');
+                
+                const titleTurkishMatch = item.title?.toLowerCase()
+                    .replace(/ı/g, 'i')
+                    .replace(/i/g, 'i')
+                    .replace(/ğ/g, 'g')
+                    .replace(/ş/g, 's')
+                    .replace(/ç/g, 'c')
+                    .replace(/ü/g, 'u')
+                    .replace(/ö/g, 'o')
+                    .includes(turkishKeyword) || false;
+                
+                const descTurkishMatch = item.description?.toLowerCase()
+                    .replace(/ı/g, 'i')
+                    .replace(/i/g, 'i')
+                    .replace(/ğ/g, 'g')
+                    .replace(/ş/g, 's')
+                    .replace(/ç/g, 'c')
+                    .replace(/ü/g, 'u')
+                    .replace(/ö/g, 'o')
+                    .includes(turkishKeyword) || false;
+                
+                const matchesKeyword = titleMatch || descMatch || phoneMatch || 
+                                    titleTurkishMatch || descTurkishMatch;
                 
                 if (matchesKeyword) {
                     items.push(item);
@@ -741,12 +878,19 @@
             items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             
             if (items.length === 0) {
-                alert("Arama kriterlerinize uygun ilan bulunamadı.");
+                hideLoading();
+                alert(`"${keyword}" ile ilgili ilan bulunamadı.`);
                 return;
             }
             
             showPage('explore');
             displayItems(items, document.getElementById('explore-items'));
+            hideLoading();
+            
+        }, (error) => {
+            console.error("Arama hatası:", error);
+            alert("Arama sırasında bir hata oluştu.");
+            hideLoading();
         });
     };
 
@@ -831,7 +975,7 @@
             reader.onload = async (event) => {
                 const base64Image = event.target.result;
                 
-                // Generate random coordinates in Turkey
+                // Türkiye içinde rastgele koordinatlar
                 const defaultLat = 39.0 + (Math.random() - 0.5) * 2;
                 const defaultLng = 35.0 + (Math.random() - 0.5) * 3;
                 
@@ -944,12 +1088,12 @@
         }
         
         container.innerHTML = items.map(item => `
-            <div class="group cursor-pointer" onclick="showItemDetailPopup('${item.id}')">
+            <div class="group cursor-pointer item-card" onclick="showItemDetailPopup('${item.id}')">
                 <div class="relative aspect-[4/5] overflow-hidden thin-border bg-white">
                     <img src="${item.image}" alt="${item.title}" class="h-full w-full object-cover grayscale-[0.3] group-hover:scale-[1.02] transition-transform duration-700">
                     <div class="absolute top-6 left-6">
                         <span class="px-3 py-1 bg-white/90 backdrop-blur-sm text-[10px] uppercase tracking-[0.2em] font-medium ${item.type === 'lost' ? 'text-lost-red' : 'text-found-green'}">
-                            ${item.type === 'lost' ? 'Lost' : 'Found'}
+                            ${item.type === 'lost' ? 'Kayıp' : 'Bulundu'}
                         </span>
                     </div>
                     ${fromMap ? `<div class="absolute bottom-6 right-6">
@@ -959,14 +1103,14 @@
                     </div>` : ''}
                 </div>
                 <div class="mt-6 flex justify-between items-start">
-                    <div>
-                        <h3 class="text-xl font-serif font-light italic">${item.title}</h3>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-serif font-light italic line-clamp-1">${item.title}</h3>
                         <p class="text-[11px] text-charcoal/40 uppercase tracking-widest mt-1">
                             ${item.phone ? '📞 ' + item.phone : 'İletişim yok'}
                         </p>
                         <p class="text-xs text-charcoal/30 mt-2 line-clamp-2">${item.description || 'Açıklama yok'}</p>
                     </div>
-                    <span class="text-[10px] text-charcoal/30">${formatDate(item.createdAt)}</span>
+                    <span class="text-[10px] text-charcoal/30 ml-2 flex-shrink-0">${formatDate(item.createdAt)}</span>
                 </div>
             </div>
         `).join('');
@@ -974,6 +1118,12 @@
 
     // --- Item Detail Popup ---
     window.showItemDetailPopup = async (itemId) => {
+        // Close any open map popup first
+        if (currentPopup && turkeyMap) {
+            turkeyMap.closePopup(currentPopup);
+            currentPopup = null;
+        }
+        
         showLoading();
         try {
             const snapshot = await get(ref(db, `items/${itemId}`));
@@ -995,7 +1145,7 @@
                             <h2 class="text-2xl font-serif font-light italic mb-2">${item.title}</h2>
                             <div class="flex items-center gap-3">
                                 <span class="px-3 py-1 ${item.type === 'lost' ? 'bg-lost-red/10 text-lost-red' : 'bg-found-green/10 text-found-green'} text-xs uppercase tracking-widest rounded">
-                                    ${item.type === 'lost' ? 'Lost' : 'Found'}
+                                    ${item.type === 'lost' ? 'Kayıp' : 'Bulundu'}
                                 </span>
                                 <span class="text-sm text-charcoal/40">${formatDate(item.createdAt)}</span>
                             </div>
@@ -1010,7 +1160,7 @@
                             <div class="aspect-square overflow-hidden rounded-xl thin-border bg-white mb-4">
                                 <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
                             </div>
-                            <div class="flex items-center gap-3 p-3 bg-off-white rounded-lg">
+                            <div class="flex items-center gap-3 p-3 bg-off-white rounded-lg cursor-pointer" onclick="showProfile('${item.userId}')">
                                 <div class="size-10 rounded-full bg-charcoal/5 flex items-center justify-center">
                                     <span class="material-symbols-outlined text-charcoal/60">person</span>
                                 </div>
@@ -1023,12 +1173,12 @@
                         
                         <div>
                             <div class="mb-4">
-                                <h3 class="font-medium text-charcoal/60 mb-2 text-sm uppercase tracking-widest">Description</h3>
-                                <p class="text-charcoal whitespace-pre-line">${item.description || 'Açıklama yok'}</p>
+                                <h3 class="font-medium text-charcoal/60 mb-2 text-sm uppercase tracking-widest">Açıklama</h3>
+                                <p class="text-charcoal whitespace-pre-line leading-relaxed">${item.description || 'Açıklama yok'}</p>
                             </div>
                             
                             <div class="mb-4">
-                                <h3 class="font-medium text-charcoal/60 mb-2 text-sm uppercase tracking-widest">Contact</h3>
+                                <h3 class="font-medium text-charcoal/60 mb-2 text-sm uppercase tracking-widest">İletişim</h3>
                                 <div class="flex items-center gap-2 p-3 bg-off-white rounded-lg">
                                     <span class="material-symbols-outlined text-charcoal/60">call</span>
                                     <span class="font-medium">${item.phone || 'İletişim numarası yok'}</span>
@@ -1036,7 +1186,7 @@
                             </div>
                             
                             <div>
-                                <h3 class="font-medium text-charcoal/60 mb-2 text-sm uppercase tracking-widest">Location</h3>
+                                <h3 class="font-medium text-charcoal/60 mb-2 text-sm uppercase tracking-widest">Konum</h3>
                                 <div id="detail-map-mini" class="map-mini bg-charcoal/5"></div>
                                 <p class="text-xs text-charcoal/40 mt-2">📍 Konum: ${item.lat?.toFixed(4) || '0'}, ${item.lng?.toFixed(4) || '0'}</p>
                             </div>
@@ -1196,24 +1346,24 @@
                     
                     <div class="grid grid-cols-3 gap-3 mb-8">
                         <div class="bg-off-white p-4 rounded-lg text-center">
-                            <p class="text-xs text-charcoal/40 uppercase tracking-widest mb-1">Total</p>
+                            <p class="text-xs text-charcoal/40 uppercase tracking-widest mb-1">Toplam</p>
                             <p class="text-2xl font-light">${totalAds}</p>
                         </div>
                         <div class="bg-lost-red/5 p-4 rounded-lg text-center">
-                            <p class="text-xs text-charcoal/40 uppercase tracking-widest mb-1">Lost</p>
+                            <p class="text-xs text-charcoal/40 uppercase tracking-widest mb-1">Kayıp</p>
                             <p class="text-2xl font-light text-lost-red">${lostAds}</p>
                         </div>
                         <div class="bg-found-green/5 p-4 rounded-lg text-center">
-                            <p class="text-xs text-charcoal/40 uppercase tracking-widest mb-1">Found</p>
+                            <p class="text-xs text-charcoal/40 uppercase tracking-widest mb-1">Bulunan</p>
                             <p class="text-2xl font-light text-found-green">${foundAds}</p>
                         </div>
                     </div>
                     
                     <div class="mb-8">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-serif font-light">My Items</h3>
+                            <h3 class="text-lg font-serif font-light">İlanlarım</h3>
                             <button onclick="showPage('add')" class="px-3 py-1.5 bg-charcoal text-white text-xs rounded-lg">
-                                + New Item
+                                + Yeni İlan
                             </button>
                         </div>
                         
@@ -1224,7 +1374,7 @@
                                         <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
                                         <div class="absolute top-2 left-2">
                                             <span class="px-2 py-0.5 ${item.type === 'lost' ? 'bg-lost-red/10 text-lost-red' : 'bg-found-green/10 text-found-green'} text-[10px] uppercase tracking-widest rounded">
-                                                ${item.type === 'lost' ? 'Lost' : 'Found'}
+                                                ${item.type === 'lost' ? 'Kayıp' : 'Bulundu'}
                                             </span>
                                         </div>
                                     </div>
@@ -1275,7 +1425,6 @@
     };
 
     window.openEditModal = async () => {
-        // Bu fonksiyon daha önceki koddan alınabilir
         alert("Profil düzenleme özelliği yakında eklenecek!");
     };
 
