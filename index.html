@@ -8,7 +8,7 @@
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     
     <!-- Tailwind CSS -->
@@ -25,23 +25,27 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary-accent": "#8e8d8a",
-                        "charcoal": "#1a1a1a",
-                        "off-white": "#faf9f6",
-                        "border-color": "#e5e5e5",
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "text-dark": "#0d141b",
+                        "text-light": "#4c739a",
                         "found-green": "#059669",
                         "lost-red": "#dc2626"
                     },
                     fontFamily: {
-                        "serif": ["Cormorant Garamond", "serif"],
                         "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.5s ease-in-out',
                         'slide-up': 'slideUp 0.3s ease-out',
-                        'float': 'float 6s ease-in-out infinite',
-                        'text-shimmer': 'textShimmer 3s infinite linear',
-                        'pulse-glow': 'pulseGlow 2s infinite'
+                        'float': 'float 6s ease-in-out infinite'
                     },
                     keyframes: {
                         fadeIn: {
@@ -55,20 +59,7 @@
                         float: {
                             '0%, 100%': { transform: 'translateY(0px)' },
                             '50%': { transform: 'translateY(-10px)' }
-                        },
-                        textShimmer: {
-                            '0%': { backgroundPosition: '200% center' },
-                            '100%': { backgroundPosition: '-200% center' }
-                        },
-                        pulseGlow: {
-                            '0%, 100%': { opacity: 1 },
-                            '50%': { opacity: 0.7 }
                         }
-                    },
-                    screens: {
-                        'xs': '475px',
-                        '3xl': '1920px',
-                        '4xl': '2560px',
                     }
                 },
             },
@@ -78,25 +69,22 @@
     <style>
         @layer base {
             body {
-                @apply bg-off-white text-charcoal font-sans antialiased;
+                @apply bg-background-light dark:bg-background-dark text-text-dark dark:text-slate-100 font-sans antialiased;
                 min-height: max(884px, 100dvh);
-            }
-            h1, h2, h3 {
-                @apply font-serif;
             }
         }
         
-        .scrollbar-hide::-webkit-scrollbar {
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
         
-        .scrollbar-hide {
+        .no-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
-        }
-        
-        .thin-border {
-            border: 0.5px solid #e5e5e5;
         }
         
         .fade-in {
@@ -107,12 +95,6 @@
             animation: slideUp 0.3s ease-out;
         }
         
-        .selection\:bg-primary-accent *::selection {
-            background-color: #8e8d8a;
-            color: white;
-        }
-        
-        /* PC için optimize görseller */
         .item-image {
             height: 70vh;
             max-height: 700px;
@@ -150,49 +132,445 @@
             }
         }
         
-        /* PC için Hero bölümü */
-        @media (min-width: 1024px) {
-            .hero-title {
-                font-size: 5rem;
-                line-height: 1.1;
-            }
-            .hero-subtitle {
-                font-size: 1.125rem;
-                letter-spacing: 0.25em;
-            }
-        }
-        
-        @media (min-width: 1280px) {
-            .hero-title {
-                font-size: 6rem;
-            }
-        }
-        
-        @media (min-width: 1920px) {
-            .hero-title {
-                font-size: 7rem;
-            }
-        }
-        
         /* Leaflet map fixes */
         .leaflet-container {
             font-family: 'Inter', sans-serif !important;
         }
         
-        .custom-popup .leaflet-popup-content-wrapper {
-            border-radius: 12px;
-            padding: 0;
+        /* YENİ TEMA: Popup ve Modal Stilleri */
+        .modal-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-container {
+            max-width: 500px;
+            width: 90vw;
+            background: white;
+            border-radius: 1rem;
             overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
             background: white;
         }
         
-        .custom-popup .leaflet-popup-content {
-            margin: 0;
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0d141b;
+        }
+        
+        .modal-close-btn {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4c739a;
+            transition: all 0.2s;
+        }
+        
+        .modal-close-btn:hover {
+            background: #f6f7f8;
+            color: #0d141b;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0.75rem;
+            color: #0d141b;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #137fec;
+            box-shadow: 0 0 0 3px rgba(19, 127, 236, 0.1);
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4c739a;
+            margin-bottom: 0.5rem;
+        }
+        
+        .primary-button {
+            width: 100%;
+            padding: 0.875rem;
+            background: #137fec;
+            color: white;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .primary-button:hover {
+            background: #0d6fd8;
+        }
+        
+        .secondary-button {
+            width: 100%;
+            padding: 0.875rem;
+            background: #f6f7f8;
+            color: #0d141b;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+        }
+        
+        .secondary-button:hover {
+            background: #e5e7eb;
+        }
+        
+        .danger-button {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .danger-button:hover {
+            background: #b91c1c;
+        }
+        
+        .success-button {
+            background: #059669;
+            color: white;
+        }
+        
+        .success-button:hover {
+            background: #047857;
+        }
+        
+        /* İlan Detay Popup Yeni Tema */
+        .detail-popup-container {
+            max-width: 900px;
+            width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .detail-image-container {
+            position: relative;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+        }
+        
+        .detail-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .detail-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .lost-badge {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .found-badge {
+            background: #059669;
+            color: white;
+        }
+        
+        .detail-content {
+            padding: 1.5rem;
+        }
+        
+        .detail-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0d141b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .detail-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #4c739a;
+            margin-bottom: 1.5rem;
+        }
+        
+        .detail-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #4c739a;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+        
+        .section-content {
+            font-size: 0.875rem;
+            color: #0d141b;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+        
+        .contact-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: #f6f7f8;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #0d141b;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: #f6f7f8;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .user-info:hover {
+            background: #e5e7eb;
+        }
+        
+        .user-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 9999px;
+            object-fit: cover;
+            border: 2px solid #137fec;
+        }
+        
+        .user-details p:first-child {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #0d141b;
+        }
+        
+        .user-details p:last-child {
+            font-size: 0.75rem;
+            color: #4c739a;
+        }
+        
+        .map-mini {
+            height: 250px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: #f6f7f8;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        /* Konum Seçme Modalı */
+        .location-modal-container {
+            max-width: 600px;
+            width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .location-map-container {
+            height: 400px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: #f6f7f8;
+        }
+        
+        .location-info {
+            padding: 1rem;
+            background: #f0f9ff;
+            border-radius: 0.75rem;
+            border: 1px solid #bfdbfe;
+        }
+        
+        .location-info-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #0d141b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .location-coords {
+            font-size: 0.75rem;
+            color: #4c739a;
+            margin-bottom: 0.25rem;
+        }
+        
+        .location-address {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        /* Profil Düzenleme Modalı */
+        .profile-edit-container {
+            max-width: 500px;
+            width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .profile-avatar-container {
+            position: relative;
+            width: 8rem;
+            height: 8rem;
+            margin: 0 auto 1.5rem auto;
+        }
+        
+        .profile-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 9999px;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .avatar-edit-btn {
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: #137fec;
+            color: white;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(19, 127, 236, 0.3);
+            transition: all 0.2s;
+        }
+        
+        .avatar-edit-btn:hover {
+            background: #0d6fd8;
+            transform: scale(1.1);
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid #f6f7f8;
+            border-top-color: #137fec;
+            border-radius: 9999px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .modal-container {
+                width: 450px;
+            }
+            
+            .detail-popup-container {
+                width: 800px;
+            }
+            
+            .profile-edit-container {
+                width: 450px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .detail-popup-container {
+                width: 900px;
+            }
+            
+            .location-modal-container {
+                width: 700px;
+            }
+        }
+        
+        /* Custom Leaflet popup styling */
+        .leaflet-popup-content-wrapper {
+            border-radius: 0.75rem !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+            border: 1px solid #e5e7eb !important;
+        }
+        
+        .leaflet-popup-content {
+            margin: 0 !important;
             width: 320px !important;
         }
         
-        .custom-popup .leaflet-popup-tip {
-            background: white;
+        .leaflet-popup-tip {
+            background: white !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
         }
         
         /* FIX: Ensure popup is above everything */
@@ -200,418 +578,171 @@
             z-index: 9999 !important;
         }
         
-        /* Item detail popup */
-        .detail-popup {
-            max-width: 900px;
-            width: 90vw;
-        }
-        
-        @media (min-width: 768px) {
-            .detail-popup {
-                width: 80vw;
-            }
-        }
-        
-        @media (min-width: 1024px) {
-            .detail-popup {
-                width: 800px;
-            }
-        }
-        
-        @media (min-width: 1536px) {
-            .detail-popup {
-                width: 900px;
-            }
-        }
-        
-        .map-mini {
-            height: 250px;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        
-        @media (min-width: 1024px) {
-            .map-mini {
-                height: 300px;
-            }
-        }
-        
-        /* Yeni konum seçme haritası için */
-        .location-map {
-            height: 300px;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        
-        @media (min-width: 768px) {
-            .location-map {
-                height: 350px;
-            }
-        }
-        
-        @media (min-width: 1024px) {
-            .location-map {
-                height: 400px;
-            }
-        }
-        
-        /* Konum seçme marker'ı için */
-        .location-marker {
-            background-color: #dc2626;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
-            cursor: pointer;
-        }
-        
-        .selected-location {
-            background-color: #059669;
-        }
-        
-        .bottom-nav-blur {
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-        
-        /* Grid optimization for PC */
-        @media (min-width: 1024px) {
-            .items-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 2.5rem;
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .modal-container,
+            .detail-popup-container,
+            .location-modal-container,
+            .profile-edit-container {
+                background: #1f2937;
+                color: #f9fafb;
             }
             
-            .item-card {
-                max-width: 500px;
-                margin: 0 auto;
-            }
-        }
-        
-        @media (min-width: 1280px) {
-            .items-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 3rem;
-            }
-        }
-        
-        @media (min-width: 1536px) {
-            .items-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 3rem;
-            }
-        }
-        
-        /* PC için daha geniş header */
-        @media (min-width: 1024px) {
-            header {
-                padding-left: 3rem;
-                padding-right: 3rem;
+            .modal-header {
+                background: #1f2937;
+                border-bottom-color: #374151;
             }
             
-            .brand-logo {
-                font-size: 2.5rem;
-            }
-        }
-        
-        /* Fix for map popup overlapping */
-        .leaflet-pane {
-            z-index: 400;
-        }
-        
-        .leaflet-top,
-        .leaflet-bottom {
-            z-index: 999;
-        }
-        
-        /* Shimmer text effect */
-        .shimmer-text {
-            background: linear-gradient(
-                90deg,
-                #1a1a1a 0%,
-                #8e8d8a 25%,
-                #1a1a1a 50%,
-                #8e8d8a 75%,
-                #1a1a1a 100%
-            );
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* Floating dots */
-        .floating-dots {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-        
-        .floating-dot {
-            position: absolute;
-            background-color: #8e8d8a;
-            border-radius: 50%;
-            opacity: 0.15;
-        }
-        
-        /* PC için istatistik kartları */
-        .stat-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
-        }
-        
-        /* PC için bottom nav iyileştirmesi */
-        @media (min-width: 1024px) {
-            nav {
-                max-width: 500px;
-                margin-left: auto;
-                margin-right: auto;
-                left: 0;
-                right: 0;
+            .modal-title {
+                color: #f9fafb;
             }
             
-            .nav-button {
-                transition: all 0.3s ease;
+            .modal-close-btn {
+                color: #9ca3af;
             }
             
-            .nav-button:hover {
-                transform: scale(1.1);
-            }
-        }
-        
-        /* PC için form alanları */
-        @media (min-width: 1024px) {
-            .form-container {
-                max-width: 700px;
-                margin-left: auto;
-                margin-right: auto;
+            .modal-close-btn:hover {
+                background: #374151;
+                color: #f9fafb;
             }
             
             .form-input {
-                padding: 1rem 1.5rem;
-                font-size: 1rem;
+                background: #374151;
+                border-color: #4b5563;
+                color: #f9fafb;
             }
             
-            .form-button {
-                padding: 1rem 2rem;
-                font-size: 1rem;
-            }
-        }
-        
-        /* PC için daha büyük harita */
-        @media (min-width: 1024px) {
-            #turkey-map {
-                height: 500px;
-            }
-        }
-        
-        @media (min-width: 1536px) {
-            #turkey-map {
-                height: 600px;
-            }
-        }
-        
-        /* PC için profil sayfası düzeni */
-        @media (min-width: 1024px) {
-            .profile-stats {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 2rem;
+            .form-input:focus {
+                border-color: #137fec;
+                box-shadow: 0 0 0 3px rgba(19, 127, 236, 0.2);
             }
             
-            .profile-stats > div {
-                padding: 2rem;
-            }
-        }
-        
-        /* Smooth transitions */
-        * {
-            transition: background-color 0.2s ease, border-color 0.2s ease;
-        }
-        
-        /* Konum seçme butonu */
-        .location-select-btn {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .location-select-btn.active {
-            background-color: #059669;
-            color: white;
-        }
-        
-        .location-select-btn.active:hover {
-            background-color: #047857;
-        }
-        
-        .selected-location-info {
-            background-color: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 8px;
-        }
-        
-        /* Profil Düzenleme Modal */
-        .profile-edit-modal {
-            max-width: 500px;
-            width: 90vw;
-        }
-        
-        @media (min-width: 768px) {
-            .profile-edit-modal {
-                width: 450px;
-            }
-        }
-        
-        /* Profil avatar */
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-        }
-        
-        @media (min-width: 768px) {
-            .profile-avatar {
-                width: 150px;
-                height: 150px;
-            }
-        }
-        
-        /* Bio alanı */
-        .bio-textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-        
-        /* PC için yatay düzen */
-        @media (min-width: 768px) {
-            .profile-horizontal {
-                display: flex;
-                gap: 3rem;
-                align-items: flex-start;
+            .form-label {
+                color: #9ca3af;
             }
             
-            .profile-sidebar {
-                width: 300px;
-                flex-shrink: 0;
+            .contact-info {
+                background: #374151;
+                color: #f9fafb;
             }
             
-            .profile-main {
-                flex: 1;
-            }
-        }
-        
-        /* PC için arama çubuğu */
-        @media (min-width: 1024px) {
-            .search-container {
-                max-width: 500px;
-                margin: 0 auto 2rem auto;
-            }
-        }
-        
-        /* Gradient border */
-        .gradient-border {
-            border: 2px solid transparent;
-            background: linear-gradient(white, white) padding-box,
-                        linear-gradient(to right, #8e8d8a, #1a1a1a) border-box;
-        }
-        
-        /* Custom scrollbar for PC */
-        @media (min-width: 768px) {
-            .custom-scrollbar::-webkit-scrollbar {
-                width: 8px;
+            .user-info {
+                background: #374151;
             }
             
-            .custom-scrollbar::-webkit-scrollbar-track {
-                background: #f1f1f1;
-                border-radius: 4px;
+            .user-info:hover {
+                background: #4b5563;
             }
             
-            .custom-scrollbar::-webkit-scrollbar-thumb {
-                background: #8e8d8a;
-                border-radius: 4px;
+            .user-details p:first-child {
+                color: #f9fafb;
             }
             
-            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                background: #666;
+            .map-mini {
+                background: #374151;
+            }
+            
+            .action-buttons {
+                border-top-color: #374151;
+            }
+            
+            .location-info {
+                background: #1e3a8a;
+                border-color: #1d4ed8;
+            }
+            
+            .leaflet-popup-content-wrapper {
+                background: #1f2937 !important;
+                border-color: #374151 !important;
+            }
+            
+            .leaflet-popup-tip {
+                background: #1f2937 !important;
             }
         }
     </style>
 </head>
-<body class="selection:bg-primary-accent selection:text-white">
+<body class="min-h-screen">
 
-<!-- Authentication Modal -->
-<div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 fade-in hidden">
-    <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl slide-up relative overflow-hidden">
-        <div class="text-center mb-8">
-            <div class="w-16 h-16 bg-charcoal rounded-full flex items-center justify-center mx-auto mb-4">
-                <span class="material-symbols-outlined text-white text-3xl">search_check</span>
+<!-- Authentication Modal (YENİ TEMA) -->
+<div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay fade-in hidden">
+    <div class="modal-container slide-up">
+        <div class="modal-header">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-2xl">search_check</span>
+                    </div>
+                    <div>
+                        <h2 id="auth-title" class="modal-title">Giriş Yap</h2>
+                        <p class="text-sm text-text-light">Topluluğa katıl, kayıp ve buluntuları yönet</p>
+                    </div>
+                </div>
+                <button onclick="closeAuthModal()" 
+                        class="modal-close-btn">
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
             </div>
-            <h2 id="auth-title" class="text-2xl font-serif font-light italic mb-2">Giriş Yap</h2>
-            <p class="text-charcoal/40 text-sm">Topluluğa katıl, kayıp ve buluntuları yönet</p>
         </div>
         
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-charcoal/60 mb-2">E-posta</label>
-                <input type="email" id="auth-email" placeholder="ornek@email.com" 
-                       class="w-full px-4 py-3 bg-off-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm form-input">
-            </div>
-            
-            <div>
-                <label class="block text-sm font-medium text-charcoal/60 mb-2">Şifre</label>
-                <input type="password" id="auth-pass" placeholder="••••••••" 
-                       class="w-full px-4 py-3 bg-off-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm form-input">
-            </div>
-            
-            <button onclick="handleAuth()" id="auth-btn" 
-                    class="w-full py-3 bg-charcoal text-white font-medium rounded-lg hover:bg-charcoal/90 transition text-sm form-button">
-                <span id="auth-btn-text">GİRİŞ YAP</span>
-            </button>
-            
-            <div class="text-center pt-4">
-                <p onclick="toggleAuthMode()" id="auth-toggle" 
-                   class="text-sm text-charcoal/60 hover:text-charcoal cursor-pointer transition">
-                    Hesabınız yok mu? <span class="underline">Kayıt Ol</span>
-                </p>
+        <div class="modal-body">
+            <div class="space-y-4">
+                <div>
+                    <label class="form-label">E-posta</label>
+                    <input type="email" id="auth-email" placeholder="ornek@email.com" 
+                           class="form-input">
+                </div>
+                
+                <div>
+                    <label class="form-label">Şifre</label>
+                    <input type="password" id="auth-pass" placeholder="••••••••" 
+                           class="form-input">
+                </div>
+                
+                <button onclick="handleAuth()" id="auth-btn" 
+                        class="primary-button">
+                    <span id="auth-btn-text">GİRİŞ YAP</span>
+                </button>
+                
+                <div class="text-center pt-4">
+                    <p onclick="toggleAuthMode()" id="auth-toggle" 
+                       class="text-sm text-text-light hover:text-text-dark cursor-pointer transition">
+                        Hesabınız yok mu? <span class="underline">Kayıt Ol</span>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Loading Overlay -->
-<div id="loading-overlay" class="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm flex items-center justify-center hidden fade-in">
-    <div class="bg-white p-6 rounded-xl shadow-xl">
-        <div class="flex flex-col items-center gap-3">
-            <div class="w-12 h-12 border-2 border-charcoal/20 border-t-charcoal rounded-full animate-spin"></div>
-            <p class="text-sm text-charcoal/60">Yükleniyor...</p>
+<!-- Loading Overlay (YENİ TEMA) -->
+<div id="loading-overlay" class="fixed inset-0 z-[60] loading-overlay flex items-center justify-center hidden fade-in">
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-xl">
+        <div class="flex flex-col items-center gap-4">
+            <div class="loading-spinner"></div>
+            <p class="text-sm text-text-light dark:text-gray-300">Yükleniyor...</p>
         </div>
     </div>
 </div>
 
-<!-- Item Detail Popup -->
-<div id="detail-modal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 fade-in hidden">
-    <div class="detail-popup bg-white rounded-2xl overflow-hidden shadow-2xl slide-up max-h-[90vh] overflow-y-auto">
+<!-- Item Detail Popup (YENİ TEMA) -->
+<div id="detail-modal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 modal-overlay fade-in hidden">
+    <div class="detail-popup-container slide-up">
         <!-- Content will be loaded here -->
     </div>
 </div>
 
-<!-- Profile Edit Modal -->
-<div id="profile-edit-modal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 fade-in hidden">
-    <div class="profile-edit-modal bg-white rounded-2xl overflow-hidden shadow-2xl slide-up max-h-[90vh] overflow-y-auto">
+<!-- Profile Edit Modal (YENİ TEMA) -->
+<div id="profile-edit-modal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 modal-overlay fade-in hidden">
+    <div class="profile-edit-container slide-up">
         <!-- Profile edit content will be loaded here -->
     </div>
 </div>
 
-<!-- Header -->
-<header class="sticky top-0 z-40 bg-off-white/80 backdrop-blur-md px-6 lg:px-12 py-5 flex items-center justify-between">
+<!-- Header (Mevcut) -->
+<header class="sticky top-0 z-40 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-6 lg:px-12 py-5 flex items-center justify-between border-b border-gray-200 dark:border-gray-800">
     <div class="flex items-center gap-2 cursor-pointer" onclick="showPage('home')">
-        <span class="font-serif italic text-2xl lg:text-3xl brand-logo tracking-tighter">kb.</span>
+        <span class="text-2xl lg:text-3xl font-bold tracking-tight text-primary">kb.</span>
     </div>
     
     <div id="header-profile" class="flex items-center gap-3">
@@ -619,93 +750,28 @@
     </div>
 </header>
 
-<!-- Main Content -->
+<!-- Main Content (Mevcut) -->
 <main class="flex-1 pb-32 container-pc">
     <!-- Ana Sayfa -->
     <section id="page-home" class="space-y-12 lg:space-y-20 fade-in">
         <!-- Hero Section -->
         <section class="px-6 lg:px-12 pt-8 lg:pt-16 pb-12 lg:pb-20 text-center relative overflow-hidden">
-            <!-- Floating dots background -->
-            <div class="floating-dots" id="floating-dots"></div>
+            <h1 class="text-4xl lg:text-6xl font-bold mb-4 lg:mb-6 text-text-dark dark:text-white">Kayıp olanı bul.</h1>
+            <p class="text-text-light uppercase tracking-widest mb-12 lg:mb-16">Özenle seçilmiş kayıp & buluntu platformu</p>
             
-            <h1 class="hero-title font-serif font-light italic mb-4 lg:mb-6">Kayıp olanı bul.</h1>
-            <p class="hero-subtitle text-charcoal/40 font-light tracking-widest uppercase mb-12 lg:mb-16">Özenle seçilmiş kayıp & buluntu platformu</p>
-            
-            <!-- Güzel Söz Bölümü -->
-            <div class="max-w-4xl mx-auto px-4 py-12 lg:py-20">
-                <div class="relative">
-                    <!-- Efektli arkaplan -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-off-white/50 to-transparent blur-xl opacity-30"></div>
-                    
-                    <!-- Ana içerik -->
-                    <div class="relative">
-                        <div class="text-center mb-8 lg:mb-12">
-                            <div class="w-20 h-20 lg:w-24 lg:h-24 mx-auto mb-6 lg:mb-8 rounded-full bg-gradient-to-br from-charcoal/5 to-primary-accent/10 flex items-center justify-center border border-charcoal/10 animate-float">
-                                <span class="material-symbols-outlined text-charcoal/40 text-3xl lg:text-4xl">favorite</span>
-                            </div>
-                            
-                            <p class="text-lg lg:text-xl font-serif italic text-charcoal/70 mb-6 lg:mb-8 leading-relaxed lg:leading-loose">
-                                "Kaybolan her şey, birilerinin hayatında bir iz bırakır.<br class="hidden lg:block">
-                                Bu izleri takip etmek, belki de yeni bir başlangıcın anahtarıdır."
-                            </p>
-                            
-                            <div class="inline-flex items-center gap-3 px-6 py-3 lg:px-8 lg:py-4 bg-gradient-to-r from-charcoal/5 to-primary-accent/5 rounded-full border border-charcoal/10 animate-pulse-glow">
-                                <div class="w-2 h-2 lg:w-3 lg:h-3 rounded-full bg-found-green animate-pulse"></div>
-                                <span class="text-xs lg:text-sm uppercase tracking-[0.3em] text-charcoal/50 font-medium">
-                                    İyilikle Bağlanıyoruz
-                                </span>
-                                <div class="w-2 h-2 lg:w-3 lg:h-3 rounded-full bg-lost-red animate-pulse delay-300"></div>
-                            </div>
-                        </div>
-                        
-                        <!-- İstatistikler -->
-                        <div class="grid grid-cols-3 gap-4 lg:gap-8 max-w-md lg:max-w-xl mx-auto mt-12 lg:mt-16">
-                            <div class="text-center stat-card bg-white p-4 lg:p-6 rounded-xl shadow-sm">
-                                <div class="text-2xl lg:text-4xl font-serif font-light text-charcoal mb-1 lg:mb-2 shimmer-text animate-text-shimmer">150+</div>
-                                <div class="text-xs lg:text-sm text-charcoal/40 uppercase tracking-widest">Bulunan</div>
-                            </div>
-                            <div class="text-center stat-card bg-white p-4 lg:p-6 rounded-xl shadow-sm">
-                                <div class="text-2xl lg:text-4xl font-serif font-light text-charcoal mb-1 lg:mb-2">89</div>
-                                <div class="text-xs lg:text-sm text-charcoal/40 uppercase tracking-widest">Mutlu An</div>
-                            </div>
-                            <div class="text-center stat-card bg-white p-4 lg:p-6 rounded-xl shadow-sm">
-                                <div class="text-2xl lg:text-4xl font-serif font-light text-charcoal mb-1 lg:mb-2">24/7</div>
-                                <div class="text-xs lg:text-sm text-charcoal/40 uppercase tracking-widest">Aktif</div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- İstatistikler -->
+            <div class="grid grid-cols-3 gap-4 lg:gap-8 max-w-md lg:max-w-xl mx-auto mt-12 lg:mt-16">
+                <div class="text-center bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-xl shadow-sm">
+                    <div class="text-2xl lg:text-4xl font-bold text-primary mb-1 lg:mb-2">150+</div>
+                    <div class="text-xs lg:text-sm text-text-light uppercase tracking-widest">Bulunan</div>
                 </div>
-            </div>
-            
-            <!-- Yol gösterici -->
-            <div class="mt-12 lg:mt-16 pt-8 lg:pt-12 border-t border-charcoal/5">
-                <div class="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16">
-                    <div class="flex items-center gap-3 lg:gap-4">
-                        <div class="size-10 lg:size-12 rounded-full bg-lost-red/10 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-lost-red text-sm lg:text-base">search</span>
-                        </div>
-                        <div class="text-left">
-                            <div class="text-sm lg:text-base font-medium text-charcoal">Kayıp İlanı Ver</div>
-                            <div class="text-xs lg:text-sm text-charcoal/40">Yardım isteyin</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hidden lg:block">
-                        <span class="material-symbols-outlined text-charcoal/20 text-2xl">arrow_forward</span>
-                    </div>
-                    <div class="block lg:hidden">
-                        <span class="material-symbols-outlined text-charcoal/20">arrow_downward</span>
-                    </div>
-                    
-                    <div class="flex items-center gap-3 lg:gap-4">
-                        <div class="size-10 lg:size-12 rounded-full bg-found-green/10 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-found-green text-sm lg:text-base">check_circle</span>
-                        </div>
-                        <div class="text-left">
-                            <div class="text-sm lg:text-base font-medium text-charcoal">Bulunanı İşaretle</div>
-                            <div class="text-xs lg:text-sm text-charcoal/40">Mutluluğu paylaşın</div>
-                        </div>
-                    </div>
+                <div class="text-center bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-xl shadow-sm">
+                    <div class="text-2xl lg:text-4xl font-bold text-primary mb-1 lg:mb-2">89</div>
+                    <div class="text-xs lg:text-sm text-text-light uppercase tracking-widest">Mutlu An</div>
+                </div>
+                <div class="text-center bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-xl shadow-sm">
+                    <div class="text-2xl lg:text-4xl font-bold text-primary mb-1 lg:mb-2">24/7</div>
+                    <div class="text-xs lg:text-sm text-text-light uppercase tracking-widest">Aktif</div>
                 </div>
             </div>
         </section>
@@ -713,16 +779,16 @@
         <!-- Son İlanlar -->
         <div class="px-6 lg:px-12 space-y-8 lg:space-y-12">
             <div class="flex items-end justify-between px-2">
-                <h2 class="text-3xl lg:text-4xl font-serif font-light">Son Kayıtlar</h2>
-                <button onclick="showPage('explore')" class="text-[10px] lg:text-xs uppercase tracking-widest text-charcoal/40 pb-1 border-b border-charcoal/20 hover:text-charcoal transition">Tümünü Gör</button>
+                <h2 class="text-3xl lg:text-4xl font-bold text-text-dark dark:text-white">Son Kayıtlar</h2>
+                <button onclick="showPage('explore')" class="text-xs uppercase tracking-widest text-text-light hover:text-text-dark transition">Tümünü Gör</button>
             </div>
             
-            <div id="recent-items" class="items-grid">
+            <div id="recent-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- İlanlar buraya yüklenecek -->
                 <div class="text-center py-12 col-span-full">
                     <div class="flex flex-col items-center gap-4">
-                        <div class="w-12 h-12 border-2 border-charcoal/20 border-t-charcoal rounded-full animate-spin"></div>
-                        <p class="text-sm text-charcoal/40">Yükleniyor...</p>
+                        <div class="loading-spinner"></div>
+                        <p class="text-sm text-text-light">Yükleniyor...</p>
                     </div>
                 </div>
             </div>
@@ -732,26 +798,26 @@
     <!-- Keşfet Sayfası -->
     <section id="page-explore" class="hidden px-6 lg:px-12 space-y-12 lg:space-y-16">
         <div class="flex items-end justify-between px-2 pt-8">
-            <h2 class="text-3xl lg:text-4xl font-serif font-light">Tüm İlanlar</h2>
+            <h2 class="text-3xl lg:text-4xl font-bold text-text-dark dark:text-white">Tüm İlanlar</h2>
             <div class="flex gap-2 lg:gap-3">
-                <button onclick="setFilter('all')" id="filter-all" class="px-3 lg:px-4 py-1 lg:py-1.5 text-[10px] lg:text-xs uppercase tracking-widest bg-charcoal text-white rounded">Tümü</button>
-                <button onclick="setFilter('lost')" id="filter-lost" class="px-3 lg:px-4 py-1 lg:py-1.5 text-[10px] lg:text-xs uppercase tracking-widest bg-off-white text-lost-red border thin-border rounded">Kayıp</button>
-                <button onclick="setFilter('found')" id="filter-found" class="px-3 lg:px-4 py-1 lg:py-1.5 text-[10px] lg:text-xs uppercase tracking-widest bg-off-white text-found-green border thin-border rounded">Bulunan</button>
+                <button onclick="setFilter('all')" id="filter-all" class="px-4 py-2 text-xs uppercase tracking-widest bg-primary text-white rounded">Tümü</button>
+                <button onclick="setFilter('lost')" id="filter-lost" class="px-4 py-2 text-xs uppercase tracking-widest bg-white text-lost-red border rounded">Kayıp</button>
+                <button onclick="setFilter('found')" id="filter-found" class="px-4 py-2 text-xs uppercase tracking-widest bg-white text-found-green border rounded">Bulunan</button>
             </div>
         </div>
         
         <!-- Arama Çubuğu -->
-        <div class="search-container">
+        <div class="max-w-lg mx-auto">
             <div class="relative">
                 <input type="text" id="search-input" placeholder="İlanlarda ara..."
-                       class="w-full px-6 py-4 bg-white border thin-border rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-charcoal/30 focus:border-transparent outline-none text-sm lg:text-base pl-12">
-                <span class="material-symbols-outlined absolute left-4 top-1/2 transform -translate-y-1/2 text-charcoal/40">
+                       class="w-full px-6 py-4 bg-white border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-base pl-12">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 transform -translate-y-1/2 text-text-light">
                     search
                 </span>
             </div>
         </div>
         
-        <div id="explore-items" class="items-grid">
+        <div id="explore-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <!-- İlanlar buraya yüklenecek -->
         </div>
     </section>
@@ -759,44 +825,44 @@
     <!-- Harita Görünümü -->
     <section id="page-map-view" class="hidden px-4 lg:px-12 space-y-8 lg:space-y-12">
         <div class="flex items-end justify-between px-2 pt-8">
-            <h2 class="text-3xl lg:text-4xl font-serif font-light">Harita Görünümü</h2>
+            <h2 class="text-3xl lg:text-4xl font-bold text-text-dark dark:text-white">Harita Görünümü</h2>
             <div class="flex gap-2 lg:gap-3">
-                <button onclick="showAllMarkers()" class="px-3 lg:px-4 py-1 lg:py-1.5 text-[10px] lg:text-xs uppercase tracking-widest bg-charcoal text-white rounded">Tümü</button>
-                <button onclick="filterMarkers('lost')" class="px-3 lg:px-4 py-1 lg:py-1.5 text-[10px] lg:text-xs uppercase tracking-widest bg-off-white text-lost-red border thin-border rounded">Kayıp</button>
-                <button onclick="filterMarkers('found')" class="px-3 lg:px-4 py-1 lg:py-1.5 text-[10px] lg:text-xs uppercase tracking-widest bg-off-white text-found-green border thin-border rounded">Bulunan</button>
+                <button onclick="showAllMarkers()" class="px-4 py-2 text-xs uppercase tracking-widest bg-primary text-white rounded">Tümü</button>
+                <button onclick="filterMarkers('lost')" class="px-4 py-2 text-xs uppercase tracking-widest bg-white text-lost-red border rounded">Kayıp</button>
+                <button onclick="filterMarkers('found')" class="px-4 py-2 text-xs uppercase tracking-widest bg-white text-found-green border rounded">Bulunan</button>
             </div>
         </div>
         
-        <div class="bg-white rounded-xl lg:rounded-2xl overflow-hidden thin-border shadow-sm">
-            <div id="turkey-map" class="w-full"></div>
+        <div class="bg-white rounded-xl overflow-hidden border shadow-sm">
+            <div id="turkey-map" class="w-full h-[500px]"></div>
         </div>
         
-        <div id="map-items-list" class="items-grid">
+        <div id="map-items-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <!-- Harita öğeleri buraya yüklenecek -->
         </div>
     </section>
     
     <!-- İlan Ekle Sayfası -->
     <section id="page-add" class="hidden">
-        <div class="max-w-lg lg:max-w-2xl mx-auto px-6 lg:px-0 py-8 lg:py-12 form-container">
+        <div class="max-w-2xl mx-auto px-6 lg:px-0 py-8 lg:py-12">
             <div class="mb-8 lg:mb-12">
-                <h2 class="text-3xl lg:text-4xl font-serif font-light mb-2">Yeni İlan Oluştur</h2>
-                <p class="text-sm lg:text-base text-charcoal/40">Kayıp veya buluntu ilanınızı toplulukla paylaşın</p>
+                <h2 class="text-3xl lg:text-4xl font-bold text-text-dark dark:text-white mb-2">Yeni İlan Oluştur</h2>
+                <p class="text-base text-text-light">Kayıp veya buluntu ilanınızı toplulukla paylaşın</p>
             </div>
             
             <div class="space-y-6 lg:space-y-8">
                 <div>
-                    <label class="block text-sm lg:text-base font-medium text-charcoal/60 mb-2 lg:mb-3">İlan Türü</label>
-                    <div class="grid grid-cols-2 gap-3 lg:gap-4">
-                        <button id="type-lost" onclick="setAdType('lost')" class="py-4 lg:py-5 rounded-lg lg:rounded-xl bg-white border thin-border text-lost-red font-medium hover:border-lost-red transition">
-                            <span class="flex items-center justify-center gap-2 lg:gap-3">
-                                <span class="material-symbols-outlined text-sm lg:text-base">search</span>
+                    <label class="block text-base font-medium text-text-light mb-3">İlan Türü</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button id="type-lost" onclick="setAdType('lost')" class="py-5 rounded-xl bg-white border text-lost-red font-bold hover:border-lost-red transition">
+                            <span class="flex items-center justify-center gap-3">
+                                <span class="material-symbols-outlined">search</span>
                                 Kayıp
                             </span>
                         </button>
-                        <button id="type-found" onclick="setAdType('found')" class="py-4 lg:py-5 rounded-lg lg:rounded-xl bg-white border thin-border text-charcoal/60 font-medium hover:border-found-green hover:text-found-green transition">
-                            <span class="flex items-center justify-center gap-2 lg:gap-3">
-                                <span class="material-symbols-outlined text-sm lg:text-base">check_circle</span>
+                        <button id="type-found" onclick="setAdType('found')" class="py-5 rounded-xl bg-white border text-text-light font-bold hover:border-found-green hover:text-found-green transition">
+                            <span class="flex items-center justify-center gap-3">
+                                <span class="material-symbols-outlined">check_circle</span>
                                 Bulundu
                             </span>
                         </button>
@@ -804,54 +870,41 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm lg:text-base font-medium text-charcoal/60 mb-2 lg:mb-3">Başlık</label>
+                    <label class="form-label">Başlık</label>
                     <input type="text" id="add-title" placeholder="Golden Retriever kayıp, Cüzdan bulundu..." 
-                           class="w-full px-4 py-3 lg:px-6 lg:py-4 bg-white border thin-border rounded-lg lg:rounded-xl focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm lg:text-base form-input">
+                           class="form-input">
                 </div>
                 
                 <div>
-                    <label class="block text-sm lg:text-base font-medium text-charcoal/60 mb-2 lg:mb-3">Açıklama</label>
+                    <label class="form-label">Açıklama</label>
                     <textarea id="add-desc" rows="4" placeholder="Detaylı açıklama (özellikler, son görüldüğü yer, iletişim bilgileri vb.)..." 
-                              class="w-full px-4 py-3 lg:px-6 lg:py-4 bg-white border thin-border rounded-lg lg:rounded-xl focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm lg:text-base resize-none form-input"></textarea>
+                              class="form-input resize-none"></textarea>
                 </div>
                 
                 <div>
-                    <label class="block text-sm lg:text-base font-medium text-charcoal/60 mb-2 lg:mb-3">İletişim Numarası</label>
+                    <label class="form-label">İletişim Numarası</label>
                     <input type="tel" id="add-phone" placeholder="+90 555 123 45 67" 
-                           class="w-full px-4 py-3 lg:px-6 lg:py-4 bg-white border thin-border rounded-lg lg:rounded-xl focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none text-sm lg:text-base form-input">
+                           class="form-input">
                 </div>
                 
                 <div>
-                    <label class="block text-sm lg:text-base font-medium text-charcoal/60 mb-2 lg:mb-3">Konum Seçimi</label>
+                    <label class="form-label">Konum Seçimi</label>
                     <div class="space-y-4">
                         <button type="button" onclick="openLocationPicker()" id="location-picker-btn" 
-                                class="w-full py-3 lg:py-4 bg-charcoal text-white font-medium rounded-lg lg:rounded-xl hover:bg-charcoal/90 transition text-sm lg:text-base flex items-center justify-center gap-2 location-select-btn">
+                                class="primary-button">
                             <span class="material-symbols-outlined">location_on</span>
                             Konumu Haritadan Seç
                         </button>
                         
-                        <div id="selected-location-info" class="hidden selected-location-info">
+                        <div id="selected-location-info" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <p class="text-sm font-medium text-charcoal mb-1">Seçilen Konum:</p>
-                                    <p id="location-coordinates" class="text-xs text-charcoal/60">Koordinatlar yükleniyor...</p>
-                                    <p id="location-address" class="text-xs text-charcoal/40 mt-1">Adres bilgisi alınıyor...</p>
+                                    <p class="text-sm font-bold text-text-dark mb-1">Seçilen Konum:</p>
+                                    <p id="location-coordinates" class="text-xs text-text-light">Koordinatlar yükleniyor...</p>
+                                    <p id="location-address" class="text-xs text-gray-500 mt-1">Adres bilgisi alınıyor...</p>
                                 </div>
-                                <button type="button" onclick="openLocationPicker()" class="text-xs text-found-green hover:underline">
+                                <button type="button" onclick="openLocationPicker()" class="text-xs text-primary hover:underline">
                                     Değiştir
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div id="location-map-container" class="hidden">
-                            <p class="text-sm text-charcoal/60 mb-2">Haritada istediğiniz yeri tıklayarak konum seçin:</p>
-                            <div id="location-map" class="location-map"></div>
-                            <div class="flex gap-3 mt-3">
-                                <button type="button" onclick="confirmLocation()" class="flex-1 py-2 bg-found-green text-white text-sm rounded-lg hover:bg-found-green/90">
-                                    Konumu Onayla
-                                </button>
-                                <button type="button" onclick="cancelLocationPicker()" class="flex-1 py-2 bg-lost-red text-white text-sm rounded-lg hover:bg-lost-red/90">
-                                    İptal
                                 </button>
                             </div>
                         </div>
@@ -859,22 +912,22 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm lg:text-base font-medium text-charcoal/60 mb-2 lg:mb-3">Fotoğraf</label>
-                    <div onclick="document.getElementById('file-input').click()" class="border-2 border-dashed border-charcoal/10 rounded-lg lg:rounded-xl p-8 lg:p-12 text-center cursor-pointer hover:border-charcoal/20 transition bg-white">
-                        <div class="w-12 h-12 lg:w-16 lg:h-16 mx-auto mb-3 lg:mb-4 bg-charcoal/5 rounded-full flex items-center justify-center">
-                            <span class="material-symbols-outlined text-charcoal/40 text-xl lg:text-2xl">photo_camera</span>
+                    <label class="form-label">Fotoğraf</label>
+                    <div onclick="document.getElementById('file-input').click()" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-primary transition bg-white">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-gray-400 text-2xl">photo_camera</span>
                         </div>
-                        <p class="text-sm lg:text-base text-charcoal/60">Fotoğraf yüklemek için tıklayın</p>
-                        <p class="text-xs lg:text-sm text-charcoal/40 mt-1 lg:mt-2">PNG, JPG (Maks. 5MB)</p>
+                        <p class="text-base text-text-light">Fotoğraf yüklemek için tıklayın</p>
+                        <p class="text-sm text-gray-500 mt-2">PNG, JPG (Maks. 5MB)</p>
                         <input type="file" id="file-input" class="hidden" accept="image/*">
                     </div>
-                    <div id="image-preview" class="mt-4 lg:mt-6 hidden">
-                        <img id="preview-img" class="w-full max-h-64 lg:max-h-80 object-contain rounded-lg lg:rounded-xl thin-border">
+                    <div id="image-preview" class="mt-6 hidden">
+                        <img id="preview-img" class="w-full max-h-80 object-contain rounded-xl border">
                     </div>
                 </div>
                 
                 <button onclick="saveAd()" id="save-btn" 
-                        class="w-full py-3 lg:py-4 bg-charcoal text-white font-medium rounded-lg lg:rounded-xl hover:bg-charcoal/90 transition text-sm lg:text-base form-button">
+                        class="primary-button">
                     <span id="save-btn-text">İlanı Yayınla</span>
                 </button>
             </div>
@@ -883,78 +936,95 @@
     
     <!-- Profil Sayfası -->
     <section id="page-profile" class="hidden">
-        <div id="profile-content" class="max-w-4xl lg:max-w-6xl mx-auto px-6 lg:px-0 py-8 lg:py-12">
+        <div id="profile-content" class="max-w-6xl mx-auto px-6 lg:px-0 py-8 lg:py-12">
             <!-- Profil içeriği buraya yüklenecek -->
         </div>
     </section>
 </main>
 
 <!-- Alt Navigasyon -->
-<nav class="fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-4 bottom-nav-blur bg-gradient-to-t from-off-white via-off-white/95 to-transparent">
-    <div class="flex items-center justify-around h-16 lg:h-20 bg-charcoal rounded-full px-6 lg:px-8 shadow-2xl">
-        <button data-page="home" class="text-off-white hover:text-off-white/80 transition-colors nav-button">
-            <span class="material-symbols-outlined font-extralight text-2xl lg:text-3xl">home</span>
+<nav class="fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800">
+    <div class="flex max-w-md mx-auto justify-around items-center">
+        <button data-page="home" class="flex flex-col items-center gap-1 text-primary">
+            <span class="material-symbols-outlined">home</span>
+            <span class="text-[10px] font-semibold">Ana Sayfa</span>
         </button>
-        <button data-page="map-view" class="text-off-white/60 hover:text-off-white transition-colors nav-button">
-            <span class="material-symbols-outlined font-extralight text-2xl lg:text-3xl">location_on</span>
+        <button data-page="map-view" class="flex flex-col items-center gap-1 text-gray-400">
+            <span class="material-symbols-outlined">map</span>
+            <span class="text-[10px] font-medium">Harita</span>
         </button>
-        <button data-page="add" class="relative -top-12 size-16 lg:size-20 bg-primary-accent rounded-full flex items-center justify-center text-white shadow-xl ring-8 ring-off-white/10 hover:scale-105 transition nav-button">
-            <span class="material-symbols-outlined text-3xl lg:text-4xl font-extralight">add</span>
+        <button data-page="add" class="relative -top-12 flex items-center justify-center size-16 bg-primary text-white rounded-full shadow-lg hover:scale-105 transition-transform z-50">
+            <span class="material-symbols-outlined text-3xl">add</span>
         </button>
-        <button data-page="explore" class="text-off-white/60 hover:text-off-white transition-colors nav-button">
-            <span class="material-symbols-outlined font-extralight text-2xl lg:text-3xl">explore</span>
+        <button data-page="explore" class="flex flex-col items-center gap-1 text-gray-400">
+            <span class="material-symbols-outlined">explore</span>
+            <span class="text-[10px] font-medium">Keşfet</span>
         </button>
-        <button data-page="profile" class="text-off-white/60 hover:text-off-white transition-colors nav-button">
-            <span class="material-symbols-outlined font-extralight text-2xl lg:text-3xl">account_circle</span>
+        <button data-page="profile" class="flex flex-col items-center gap-1 text-gray-400">
+            <span class="material-symbols-outlined">person</span>
+            <span class="text-[10px] font-medium">Profil</span>
         </button>
     </div>
 </nav>
 
-<!-- Konum Seçme Modalı -->
-<div id="location-modal" class="fixed inset-0 z-[9998] flex items-center justify-center p-4 bg-black/60 fade-in hidden">
-    <div class="bg-white rounded-2xl overflow-hidden shadow-2xl slide-up w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div class="p-6 lg:p-8">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl lg:text-3xl font-serif font-light">Konum Seç</h2>
-                <button onclick="closeLocationModal()" class="p-2 hover:bg-charcoal/5 rounded-lg transition">
-                    <span class="material-symbols-outlined text-charcoal/60">close</span>
+<!-- Konum Seçme Modalı (YENİ TEMA) -->
+<div id="location-modal" class="fixed inset-0 z-[9998] flex items-center justify-center p-4 modal-overlay fade-in hidden">
+    <div class="location-modal-container slide-up">
+        <div class="modal-header">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white">location_on</span>
+                    </div>
+                    <div>
+                        <h2 class="modal-title">Konum Seç</h2>
+                        <p class="text-sm text-text-light">Kayıp/Buluntu konumunu haritadan seçin</p>
+                    </div>
+                </div>
+                <button onclick="closeLocationModal()" class="modal-close-btn">
+                    <span class="material-symbols-outlined text-xl">close</span>
                 </button>
             </div>
-            
-            <div class="mb-4">
-                <p class="text-sm text-charcoal/60 mb-2">Haritada kaybolan/bulunan eşyanın konumunu seçin:</p>
-                <div class="flex items-center gap-2 text-xs text-charcoal/40">
-                    <span class="material-symbols-outlined text-sm">info</span>
-                    İstediğiniz yeri tıklayın veya haritayı kaydırarak konumu bulun
-                </div>
-            </div>
-            
-            <div id="location-modal-map" class="h-96 lg:h-[500px] rounded-xl overflow-hidden thin-border"></div>
-            
-            <div class="mt-6 p-4 bg-off-white rounded-lg">
-                <div class="flex items-center justify-between mb-3">
-                    <div>
-                        <p class="font-medium text-charcoal">Seçilen Konum:</p>
-                        <p id="modal-location-coords" class="text-sm text-charcoal/60">Koordinatlar: -</p>
-                        <p id="modal-location-address" class="text-xs text-charcoal/40">Adres: Konum seçilmedi</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="getUserLocation()" class="px-3 py-2 bg-charcoal text-white text-xs rounded-lg hover:bg-charcoal/90 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm">my_location</span>
-                            Mevcut Konum
-                        </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-text-light mb-2">Haritada kaybolan/bulunan eşyanın konumunu seçin:</p>
+                    <div class="flex items-center gap-2 text-xs text-text-light">
+                        <span class="material-symbols-outlined text-sm">info</span>
+                        İstediğiniz yeri tıklayın veya haritayı kaydırarak konumu bulun
                     </div>
                 </div>
                 
-                <div class="flex gap-3">
-                    <button onclick="saveSelectedLocation()" id="confirm-location-btn" disabled
-                            class="flex-1 py-3 bg-found-green text-white font-medium rounded-lg hover:bg-found-green/90 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                        Konumu Onayla
-                    </button>
-                    <button onclick="closeLocationModal()" 
-                            class="flex-1 py-3 bg-lost-red text-white font-medium rounded-lg hover:bg-lost-red/90 transition">
-                        İptal
-                    </button>
+                <div id="location-modal-map" class="location-map-container"></div>
+                
+                <div class="location-info">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <p class="location-info-title">Seçilen Konum:</p>
+                            <p id="modal-location-coords" class="location-coords">Koordinatlar: -</p>
+                            <p id="modal-location-address" class="location-address">Adres: Konum seçilmedi</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="getUserLocation()" 
+                                    class="px-3 py-2 bg-primary text-white text-xs rounded-lg hover:bg-primary/90 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">my_location</span>
+                                Mevcut Konum
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="saveSelectedLocation()" id="confirm-location-btn" disabled
+                                class="primary-button success-button disabled:opacity-50 disabled:cursor-not-allowed">
+                            Konumu Onayla
+                        </button>
+                        <button onclick="closeLocationModal()" 
+                                class="secondary-button">
+                            İptal
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1001,6 +1071,28 @@
     let searchTerm = '';
     let allItems = [];
 
+    // --- Utility Functions ---
+    function formatDate(dateString) {
+        if (!dateString) return 'Tarih yok';
+        
+        const date = new Date(dateString);
+        const now = new Date();
+        const diff = now - date;
+        
+        if (isNaN(diff)) return 'Tarih yok';
+        
+        if (diff < 60000) return 'Az önce';
+        if (diff < 3600000) return `${Math.floor(diff / 60000)} dakika önce`;
+        if (diff < 86400000) return `${Math.floor(diff / 3600000)} saat önce`;
+        if (diff < 604800000) return `${Math.floor(diff / 86400000)} gün önce`;
+        
+        return date.toLocaleDateString('tr-TR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    }
+
     // --- Loading Overlay ---
     function showLoading() {
         if (!isLoading) {
@@ -1012,36 +1104,6 @@
     function hideLoading() {
         isLoading = false;
         document.getElementById('loading-overlay').classList.add('hidden');
-    }
-
-    // --- Floating Dots Animation ---
-    function createFloatingDots() {
-        const container = document.getElementById('floating-dots');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        
-        const dotCount = window.innerWidth > 1024 ? 25 : 15;
-        
-        for (let i = 0; i < dotCount; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'floating-dot';
-            
-            const size = Math.random() * (window.innerWidth > 1024 ? 8 : 6) + 2;
-            const posX = Math.random() * 100;
-            const posY = Math.random() * 100;
-            const delay = Math.random() * 5;
-            const duration = Math.random() * (window.innerWidth > 1024 ? 15 : 10) + 10;
-            
-            dot.style.width = `${size}px`;
-            dot.style.height = `${size}px`;
-            dot.style.left = `${posX}%`;
-            dot.style.top = `${posY}%`;
-            dot.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
-            dot.style.opacity = Math.random() * 0.2 + 0.05;
-            
-            container.appendChild(dot);
-        }
     }
 
     // --- Bottom Navigation Setup ---
@@ -1057,34 +1119,17 @@
         });
     }
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-        setupBottomNavigation();
-        showPage('home');
-        setAdType('lost');
-        setFilter('all');
-        createFloatingDots();
-        
-        // Arama input event listener
-        const searchInput = document.getElementById('search-input');
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                searchTerm = this.value.toLowerCase();
-                loadExploreItems();
-            });
-        }
-        
-        if (window.innerWidth > 1024) {
-            document.body.classList.add('text-lg');
-        }
-        
-        window.addEventListener('resize', createFloatingDots);
-    });
+    // --- Modal Functions ---
+    window.closeAuthModal = () => {
+        document.getElementById('auth-modal').classList.add('hidden');
+    };
 
-    // --- Konum Seçme Fonksiyonları ---
-    window.openLocationPicker = () => {
-        document.getElementById('location-modal').classList.remove('hidden');
-        initLocationMap();
+    window.closeDetailModal = () => {
+        document.getElementById('detail-modal').classList.add('hidden');
+    };
+
+    window.closeProfileEditModal = () => {
+        document.getElementById('profile-edit-modal').classList.add('hidden');
     };
 
     window.closeLocationModal = () => {
@@ -1094,6 +1139,54 @@
             locationMap = null;
             locationMarker = null;
         }
+    };
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        setupBottomNavigation();
+        showPage('home');
+        setAdType('lost');
+        setFilter('all');
+        
+        // Arama input event listener
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                searchTerm = this.value.toLowerCase();
+                loadExploreItems();
+            });
+        }
+
+        // File input event listener
+        const fileInput = document.getElementById('file-input');
+        if (fileInput) {
+            fileInput.addEventListener('change', handleImageUpload);
+        }
+    });
+
+    function handleImageUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Dosya boyutu 5MB'tan küçük olmalıdır.");
+            return;
+        }
+        
+        selectedImage = file;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const preview = document.getElementById('preview-img');
+            preview.src = event.target.result;
+            document.getElementById('image-preview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // --- Konum Seçme Fonksiyonları ---
+    window.openLocationPicker = () => {
+        document.getElementById('location-modal').classList.remove('hidden');
+        initLocationMap();
     };
 
     function initLocationMap() {
@@ -1153,15 +1246,13 @@
         locationMarker = L.marker([lat, lng], {
             icon: L.divIcon({
                 className: 'custom-location-marker',
-                html: `<div class="location-marker">
-                         <div style="width: 100%; height: 100%; border-radius: 50%; background-color: #dc2626; display: flex; align-items: center; justify-content: center;">
-                           <span class="material-symbols-outlined" style="color: white; font-size: 12px;">
-                             location_on
-                           </span>
-                         </div>
+                html: `<div style="width: 32px; height: 32px; background-color: #137fec; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+                         <span class="material-symbols-outlined" style="color: white; font-size: 16px;">
+                           location_on
+                         </span>
                        </div>`,
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
             })
         }).addTo(locationMap);
         
@@ -1356,12 +1447,6 @@
         if (pageElement) {
             pageElement.classList.remove('hidden');
             
-            if (pageId === 'home') {
-                setTimeout(() => {
-                    createFloatingDots();
-                }, 100);
-            }
-            
             // İlan ekleme sayfasına geçtiğimizde konum seçimini sıfırla
             if (pageId === 'add') {
                 resetLocationSelection();
@@ -1425,10 +1510,6 @@
         if (!mapElement) return;
         
         if (!turkeyMap) {
-            const mapHeight = window.innerWidth > 1024 ? '500px' : 
-                            window.innerWidth > 1536 ? '600px' : '400px';
-            mapElement.style.height = mapHeight;
-            
             turkeyMap = L.map('turkey-map').setView([39.0, 35.0], 6);
             
             turkeyMap.setMaxBounds([
@@ -1484,7 +1565,7 @@
 
     function loadMapItems(filterType = 'all') {
         const container = document.getElementById('map-items-list');
-        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="animate-spin w-8 h-8 border-2 border-charcoal/20 border-t-charcoal rounded-full mx-auto"></div></div>';
+        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="loading-spinner mx-auto"></div></div>';
         
         onValue(ref(db, 'items'), (snapshot) => {
             const items = [];
@@ -1500,7 +1581,7 @@
             items.forEach(item => {
                 if (item.lat && item.lng) {
                     const markerColor = item.type === 'lost' ? '#dc2626' : '#059669';
-                    const iconColor = item.userId === currentUser?.uid ? '#8e8d8a' : markerColor;
+                    const iconColor = item.userId === currentUser?.uid ? '#137fec' : markerColor;
                     
                     const markerIcon = L.divIcon({
                         className: 'custom-marker',
@@ -1516,24 +1597,24 @@
                     const mapMarker = L.marker([item.lat, item.lng], { icon: markerIcon }).addTo(turkeyMap);
                     
                     const popupContent = `
-                        <div style="min-width: 250px; padding: 16px; font-family: 'Inter', sans-serif;">
-                            <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
-                                <div style="width: 60px; height: 60px; border-radius: 8px; overflow: hidden; flex-shrink: 0;">
+                        <div style="min-width: 250px; padding: 1rem; font-family: 'Inter', sans-serif; background: white; border-radius: 0.75rem;">
+                            <div style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.75rem;">
+                                <div style="width: 60px; height: 60px; border-radius: 0.5rem; overflow: hidden; flex-shrink: 0;">
                                     <img src="${item.image}" style="width: 100%; height: 100%; object-fit: cover;">
                                 </div>
                                 <div>
-                                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                    <div style="display: flex; align-items: center; gap: 0.375rem; margin-bottom: 0.25rem;">
                                         <div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${item.type === 'lost' ? '#dc2626' : '#059669'}"></div>
-                                        <strong style="font-size: 14px; font-weight: 600;">${item.title}</strong>
+                                        <strong style="font-size: 0.875rem; font-weight: 600; color: #0d141b;">${item.title}</strong>
                                     </div>
-                                    <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">
+                                    <p style="font-size: 0.75rem; color: #4c739a; margin-bottom: 0.5rem; line-height: 1.4;">
                                         ${item.description.substring(0, 80)}${item.description.length > 80 ? '...' : ''}
                                     </p>
                                 </div>
                             </div>
-                            <button onclick="window.handleMapPopupDetail('${item.id}')" style="width: 100%; padding: 8px 16px; background: #1a1a1a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; transition: background 0.2s;" 
-                                    onmouseover="this.style.backgroundColor='#333'"
-                                    onmouseout="this.style.backgroundColor='#1a1a1a'">
+                            <button onclick="window.handleMapPopupDetail('${item.id}')" style="width: 100%; padding: 0.5rem 1rem; background: #137fec; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 0.75rem; font-weight: 500; transition: background 0.2s;" 
+                                    onmouseover="this.style.backgroundColor='#0d6fd8'"
+                                    onmouseout="this.style.backgroundColor='#137fec'">
                                 Detayları Gör
                             </button>
                         </div>
@@ -1567,10 +1648,10 @@
             console.error("Harita verisi yükleme hatası:", error);
             container.innerHTML = `
                 <div class="col-span-full text-center py-12">
-                    <div class="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <span class="material-symbols-outlined text-charcoal/40">error</span>
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="material-symbols-outlined text-gray-400">error</span>
                     </div>
-                    <p class="text-sm text-charcoal/40">Harita verileri yüklenirken bir hata oluştu.</p>
+                    <p class="text-sm text-gray-400">Harita verileri yüklenirken bir hata oluştu.</p>
                 </div>
             `;
         });
@@ -1591,39 +1672,19 @@
         const foundBtn = document.getElementById('type-found');
         
         if (type === 'lost') {
-            lostBtn.classList.add('border-lost-red', 'text-lost-red');
-            lostBtn.classList.remove('text-charcoal/60');
+            lostBtn.classList.add('border-lost-red', 'text-lost-red', 'font-bold');
+            lostBtn.classList.remove('text-text-light');
             
-            foundBtn.classList.remove('border-found-green', 'text-found-green', 'hover:border-found-green', 'hover:text-found-green');
-            foundBtn.classList.add('border', 'thin-border', 'text-charcoal/60');
+            foundBtn.classList.remove('border-found-green', 'text-found-green', 'hover:border-found-green', 'hover:text-found-green', 'font-bold');
+            foundBtn.classList.add('border', 'text-text-light');
         } else {
-            foundBtn.classList.add('border-found-green', 'text-found-green', 'hover:border-found-green', 'hover:text-found-green');
-            foundBtn.classList.remove('text-charcoal/60');
+            foundBtn.classList.add('border-found-green', 'text-found-green', 'hover:border-found-green', 'hover:text-found-green', 'font-bold');
+            foundBtn.classList.remove('text-text-light');
             
-            lostBtn.classList.remove('border-lost-red', 'text-lost-red');
-            lostBtn.classList.add('border', 'thin-border', 'text-charcoal/60');
+            lostBtn.classList.remove('border-lost-red', 'text-lost-red', 'font-bold');
+            lostBtn.classList.add('border', 'text-text-light');
         }
     };
-
-    // Image upload handling
-    document.getElementById('file-input').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        if (file.size > 5 * 1024 * 1024) {
-            alert("Dosya boyutu 5MB'tan küçük olmalıdır.");
-            return;
-        }
-        
-        selectedImage = file;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const preview = document.getElementById('preview-img');
-            preview.src = event.target.result;
-            document.getElementById('image-preview').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-    });
 
     window.saveAd = async () => {
         if (!currentUser) {
@@ -1726,7 +1787,7 @@
     // --- Item Display ---
     function loadRecentItems() {
         const container = document.getElementById('recent-items');
-        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="animate-spin w-8 h-8 border-2 border-charcoal/20 border-t-charcoal rounded-full mx-auto"></div></div>';
+        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="loading-spinner mx-auto"></div></div>';
         
         onValue(ref(db, 'items'), (snapshot) => {
             allItems = [];
@@ -1744,10 +1805,10 @@
             console.error("Veri yükleme hatası:", error);
             container.innerHTML = `
                 <div class="col-span-full text-center py-12">
-                    <div class="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <span class="material-symbols-outlined text-charcoal/40">error</span>
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="material-symbols-outlined text-gray-400">error</span>
                     </div>
-                    <p class="text-sm text-charcoal/40">İlanlar yüklenirken bir hata oluştu.</p>
+                    <p class="text-sm text-gray-400">İlanlar yüklenirken bir hata oluştu.</p>
                 </div>
             `;
         });
@@ -1755,7 +1816,7 @@
 
     window.loadExploreItems = () => {
         const container = document.getElementById('explore-items');
-        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="animate-spin w-8 h-8 border-2 border-charcoal/20 border-t-charcoal rounded-full mx-auto"></div></div>';
+        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="loading-spinner mx-auto"></div></div>';
         
         onValue(ref(db, 'items'), (snapshot) => {
             allItems = [];
@@ -1789,11 +1850,11 @@
         if (items.length === 0) {
             container.innerHTML = `
                 <div class="col-span-full text-center py-12">
-                    <div class="w-12 h-12 bg-charcoal/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <span class="material-symbols-outlined text-charcoal/40">search_off</span>
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="material-symbols-outlined text-gray-400">search_off</span>
                     </div>
-                    <p class="text-sm text-charcoal/40">${searchTerm ? 'Aramanızla eşleşen ilan bulunamadı.' : 'Henüz ilan bulunmuyor.'}</p>
-                    <button onclick="showPage('add')" class="mt-3 px-4 py-1.5 bg-charcoal text-white text-xs rounded-lg">
+                    <p class="text-sm text-gray-400">${searchTerm ? 'Aramanızla eşleşen ilan bulunamadı.' : 'Henüz ilan bulunmuyor.'}</p>
+                    <button onclick="showPage('add')" class="mt-3 px-4 py-1.5 bg-primary text-white text-xs rounded-lg">
                         İlk İlanı Sen Ver
                     </button>
                 </div>
@@ -1802,35 +1863,35 @@
         }
         
         container.innerHTML = items.map(item => `
-            <div class="group cursor-pointer item-card" onclick="showItemDetailPopup('${item.id}')">
-                <div class="relative aspect-[4/5] overflow-hidden thin-border bg-white">
-                    <img src="${item.image}" alt="${item.title}" class="h-full w-full object-cover grayscale-[0.3] group-hover:scale-[1.02] transition-transform duration-700">
-                    <div class="absolute top-6 left-6">
-                        <span class="px-3 py-1 bg-white/90 backdrop-blur-sm text-[10px] lg:text-xs uppercase tracking-[0.2em] font-medium ${item.type === 'lost' ? 'text-lost-red' : 'text-found-green'}">
+            <div class="group cursor-pointer" onclick="showItemDetailPopup('${item.id}')">
+                <div class="relative aspect-[4/5] overflow-hidden rounded-xl bg-white shadow-md">
+                    <img src="${item.image}" alt="${item.title}" class="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-700">
+                    <div class="absolute top-4 left-4">
+                        <span class="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs uppercase tracking-widest font-bold ${item.type === 'lost' ? 'text-lost-red' : 'text-found-green'} rounded-lg">
                             ${item.type === 'lost' ? 'Kayıp' : 'Bulundu'}
                         </span>
                     </div>
-                    ${fromMap ? `<div class="absolute bottom-6 right-6">
-                        <button onclick="event.stopPropagation(); showItemDetailPopup('${item.id}')" class="size-8 lg:size-10 bg-charcoal/80 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-charcoal transition">
-                            <span class="material-symbols-outlined text-sm lg:text-base">visibility</span>
+                    ${fromMap ? `<div class="absolute bottom-4 right-4">
+                        <button onclick="event.stopPropagation(); showItemDetailPopup('${item.id}')" class="size-10 bg-black/80 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black transition">
+                            <span class="material-symbols-outlined text-base">visibility</span>
                         </button>
                     </div>` : ''}
                 </div>
-                <div class="mt-6 flex justify-between items-start">
+                <div class="mt-4 flex justify-between items-start">
                     <div class="flex-1">
-                        <h3 class="text-xl lg:text-2xl font-serif font-light italic line-clamp-1">${item.title}</h3>
-                        <p class="text-[11px] lg:text-xs text-charcoal/40 uppercase tracking-widest mt-1">
+                        <h3 class="text-lg font-bold line-clamp-1">${item.title}</h3>
+                        <p class="text-xs text-text-light mt-1">
                             ${item.phone ? '📞 ' + item.phone : 'İletişim yok'}
                         </p>
-                        <p class="text-xs lg:text-sm text-charcoal/30 mt-2 line-clamp-2">${item.description || 'Açıklama yok'}</p>
+                        <p class="text-sm text-gray-500 mt-2 line-clamp-2">${item.description || 'Açıklama yok'}</p>
                     </div>
-                    <span class="text-[10px] lg:text-xs text-charcoal/30 ml-2 flex-shrink-0">${formatDate(item.createdAt)}</span>
+                    <span class="text-xs text-gray-400 ml-2 flex-shrink-0">${formatDate(item.createdAt)}</span>
                 </div>
             </div>
         `).join('');
     }
 
-    // --- Item Detail Popup ---
+    // --- Item Detail Popup (YENİ TEMA) ---
     window.showItemDetailPopup = async (itemId) => {
         if (currentPopup && turkeyMap) {
             turkeyMap.closePopup(currentPopup);
@@ -1849,74 +1910,80 @@
             const item = snapshot.val();
             
             const detailModal = document.getElementById('detail-modal');
-            const detailContent = detailModal.querySelector('.detail-popup');
+            const detailContent = detailModal.querySelector('.detail-popup-container');
             
             detailContent.innerHTML = `
-                <div class="p-6 lg:p-8">
-                    <div class="flex items-start justify-between mb-6 lg:mb-8">
+                <div class="detail-image-container">
+                    <img src="${item.image}" alt="${item.title}" class="detail-image">
+                    <div class="detail-badge ${item.type === 'lost' ? 'lost-badge' : 'found-badge'}">
+                        ${item.type === 'lost' ? 'Kayıp' : 'Bulundu'}
+                    </div>
+                </div>
+                
+                <div class="detail-content">
+                    <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h2 class="text-2xl lg:text-3xl font-serif font-light italic mb-2">${item.title}</h2>
-                            <div class="flex items-center gap-3">
-                                <span class="px-3 py-1 ${item.type === 'lost' ? 'bg-lost-red/10 text-lost-red' : 'bg-found-green/10 text-found-green'} text-xs lg:text-sm uppercase tracking-widest rounded">
-                                    ${item.type === 'lost' ? 'Kayıp' : 'Bulundu'}
-                                </span>
-                                <span class="text-sm lg:text-base text-charcoal/40">${formatDate(item.createdAt)}</span>
+                            <h1 class="detail-title">${item.title}</h1>
+                            <div class="detail-meta">
+                                <span class="material-symbols-outlined text-sm">schedule</span>
+                                <span>${formatDate(item.createdAt)}</span>
                             </div>
                         </div>
-                        <button onclick="closeDetailModal()" class="p-2 hover:bg-charcoal/5 rounded-lg transition">
-                            <span class="material-symbols-outlined text-charcoal/60 text-xl lg:text-2xl">close</span>
+                        <button onclick="closeDetailModal()" class="modal-close-btn">
+                            <span class="material-symbols-outlined text-xl">close</span>
                         </button>
                     </div>
                     
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
-                        <div>
-                            <div class="aspect-square overflow-hidden rounded-xl lg:rounded-2xl thin-border bg-white mb-4 lg:mb-6">
-                                <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-off-white rounded-lg lg:rounded-xl cursor-pointer" onclick="showProfile('${item.userId}')">
-                                <div class="size-10 lg:size-12 rounded-full bg-charcoal/5 flex items-center justify-center">
-                                    <span class="material-symbols-outlined text-charcoal/60 text-lg lg:text-xl">person</span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="space-y-6">
+                            <div class="detail-section">
+                                <h3 class="section-title">Açıklama</h3>
+                                <div class="section-content">
+                                    ${item.description || 'Açıklama yok'}
                                 </div>
-                                <div>
-                                    <p class="text-sm lg:text-base font-medium">${item.userName || 'Kullanıcı'}</p>
-                                    <p class="text-xs lg:text-sm text-charcoal/40">${item.userEmail || ''}</p>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h3 class="section-title">İletişim</h3>
+                                <div class="contact-info">
+                                    <span class="material-symbols-outlined">call</span>
+                                    <span>${item.phone || 'İletişim numarası yok'}</span>
+                                </div>
+                            </div>
+                            
+                            <div onclick="showProfile('${item.userId}')" class="user-info">
+                                <img src="${item.userProfileImage || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAHgmz9ZdyrrnVStj22LkErbA8T2RxayfdXNwm9XagSatARcd3ffXC_gnMjwdMeTVIM1_naprdoDBH5E3oQbSpPToZ9pFGChkcvGo7fUPwhQIeIDqqxkhg_0GG1S_EIbuKM63LbIbQBaMofSj_XkXehUr35iKp9AOfl7D_5tV9hf9L31MrtXPhZTrnFNVIgStVmeBJPzZwRvfbNPNyWtRAxeHdGww_HnK4TbZVi8SjQ246qUt_7_Kf_MPPuOxI2yvPYY3om-iE61Vc'}" 
+                                     alt="${item.userName}" class="user-avatar">
+                                <div class="user-details">
+                                    <p>${item.userName || 'Kullanıcı'}</p>
+                                    <p>${item.userEmail || ''}</p>
                                 </div>
                             </div>
                         </div>
                         
-                        <div>
-                            <div class="mb-4 lg:mb-6">
-                                <h3 class="font-medium text-charcoal/60 mb-2 lg:mb-3 text-sm lg:text-base uppercase tracking-widest">Açıklama</h3>
-                                <p class="text-charcoal whitespace-pre-line leading-relaxed text-sm lg:text-base">${item.description || 'Açıklama yok'}</p>
-                            </div>
-                            
-                            <div class="mb-4 lg:mb-6">
-                                <h3 class="font-medium text-charcoal/60 mb-2 lg:mb-3 text-sm lg:text-base uppercase tracking-widest">İletişim</h3>
-                                <div class="flex items-center gap-2 lg:gap-3 p-3 lg:p-4 bg-off-white rounded-lg lg:rounded-xl">
-                                    <span class="material-symbols-outlined">call</span>
-                                    <span class="font-medium text-sm lg:text-base">${item.phone || 'İletişim numarası yok'}</span>
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <h3 class="font-medium text-charcoal/60 mb-2 lg:mb-3 text-sm lg:text-base uppercase tracking-widest">Konum</h3>
-                                <div id="detail-map-mini" class="map-mini bg-charcoal/5"></div>
-                                <p class="text-xs lg:text-sm text-charcoal/40 mt-2">
-                                    📍 ${item.address || `Koordinatlar: ${item.lat?.toFixed(4) || '0'}, ${item.lng?.toFixed(4) || '0'}`}
+                        <div class="space-y-6">
+                            <div class="detail-section">
+                                <h3 class="section-title">Konum</h3>
+                                <div id="detail-map-mini" class="map-mini"></div>
+                                <p class="text-xs text-text-light mt-2">
+                                    <span class="material-symbols-outlined text-sm">location_on</span>
+                                    ${item.address || `Koordinatlar: ${item.lat?.toFixed(4) || '0'}, ${item.lng?.toFixed(4) || '0'}`}
                                 </p>
                             </div>
                         </div>
                     </div>
                     
                     ${currentUser && item.userId === currentUser.uid && item.type === 'lost' ? `
-                        <div class="pt-6 border-t thin-border flex gap-3 lg:gap-4">
+                        <div class="action-buttons">
                             <button onclick="markAsFound('${itemId}')" 
-                                    class="flex-1 py-3 lg:py-4 bg-found-green text-white font-medium rounded-lg lg:rounded-xl hover:bg-found-green/90 transition text-sm lg:text-base">
-                                ✅ Bulundu Olarak İşaretle
+                                    class="primary-button success-button">
+                                <span class="material-symbols-outlined">check_circle</span>
+                                Bulundu Olarak İşaretle
                             </button>
                             <button onclick="deleteItem('${itemId}')" 
-                                    class="flex-1 py-3 lg:py-4 bg-lost-red text-white font-medium rounded-lg lg:rounded-xl hover:bg-lost-red/90 transition text-sm lg:text-base">
-                                🗑️ İlanı Sil
+                                    class="secondary-button danger-button">
+                                <span class="material-symbols-outlined">delete</span>
+                                İlanı Sil
                             </button>
                         </div>
                     ` : ''}
@@ -1925,6 +1992,7 @@
             
             detailModal.classList.remove('hidden');
             
+            // Mini haritayı başlat
             setTimeout(() => {
                 const miniMap = L.map('detail-map-mini').setView([item.lat || 39.0, item.lng || 35.0], 13);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(miniMap);
@@ -1952,10 +2020,6 @@
             alert("İlan detayları yüklenirken bir hata oluştu.");
             hideLoading();
         }
-    };
-
-    window.closeDetailModal = () => {
-        document.getElementById('detail-modal').classList.add('hidden');
     };
 
     window.markAsFound = async (itemId) => {
@@ -2008,8 +2072,8 @@
         const container = document.getElementById('profile-content');
         container.innerHTML = `
             <div class="flex flex-col items-center justify-center py-12">
-                <div class="animate-spin w-8 h-8 border-2 border-charcoal/20 border-t-charcoal rounded-full mb-3"></div>
-                <p class="text-sm text-charcoal/40">Yükleniyor...</p>
+                <div class="loading-spinner mb-3"></div>
+                <p class="text-sm text-text-light">Yükleniyor...</p>
             </div>
         `;
         
@@ -2042,66 +2106,66 @@
             const foundAds = userItems.filter(item => item.type === 'found').length;
             
             container.innerHTML = `
-                <div class="mb-8 lg:mb-12">
-                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 lg:mb-8">
+                <div class="mb-8">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
                         <div>
-                            <h2 class="text-3xl lg:text-4xl font-serif font-light italic mb-2">${userData?.name || 'Kullanıcı'}</h2>
-                            <p class="text-sm lg:text-base text-charcoal/40">${userData?.email || currentUser?.email || ''}</p>
-                            ${userData?.bio ? `<p class="text-sm lg:text-base text-charcoal/60 mt-2">${userData.bio}</p>` : ''}
-                            ${userData?.contact ? `<p class="text-sm lg:text-base text-charcoal/40 mt-1">📞 ${userData.contact}</p>` : ''}
+                            <h2 class="text-2xl font-bold mb-2">${userData?.name || 'Kullanıcı'}</h2>
+                            <p class="text-sm text-text-light">${userData?.email || currentUser?.email || ''}</p>
+                            ${userData?.bio ? `<p class="text-sm text-gray-600 mt-2">${userData.bio}</p>` : ''}
+                            ${userData?.contact ? `<p class="text-sm text-gray-500 mt-1">📞 ${userData.contact}</p>` : ''}
                         </div>
-                        <div class="flex gap-2 lg:gap-3">
-                            <button onclick="openProfileEditModal()" class="px-4 lg:px-6 py-2 lg:py-3 bg-charcoal text-white text-xs lg:text-sm rounded-lg lg:rounded-xl">
+                        <div class="flex gap-2">
+                            <button onclick="openProfileEditModal()" class="primary-button px-6">
                                 Profili Düzenle
                             </button>
-                            <button onclick="logout()" class="px-4 lg:px-6 py-2 lg:py-3 bg-lost-red text-white text-xs lg:text-sm rounded-lg lg:rounded-xl">
+                            <button onclick="logout()" class="secondary-button px-6">
                                 Çıkış Yap
                             </button>
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-3 gap-3 lg:gap-6 mb-8 lg:mb-12 profile-stats">
-                        <div class="bg-off-white p-4 lg:p-6 rounded-lg lg:rounded-xl text-center">
-                            <p class="text-xs lg:text-sm text-charcoal/40 uppercase tracking-widest mb-1 lg:mb-2">Toplam</p>
-                            <p class="text-2xl lg:text-4xl font-light">${totalAds}</p>
+                    <div class="grid grid-cols-3 gap-3 mb-8">
+                        <div class="bg-gray-50 p-4 rounded-xl text-center">
+                            <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Toplam</p>
+                            <p class="text-2xl font-bold">${totalAds}</p>
                         </div>
-                        <div class="bg-lost-red/5 p-4 lg:p-6 rounded-lg lg:rounded-xl text-center">
-                            <p class="text-xs lg:text-sm text-charcoal/40 uppercase tracking-widest mb-1 lg:mb-2">Kayıp</p>
-                            <p class="text-2xl lg:text-4xl font-light text-lost-red">${lostAds}</p>
+                        <div class="bg-red-50 p-4 rounded-xl text-center">
+                            <p class="text-xs text-red-500 uppercase tracking-wider mb-1">Kayıp</p>
+                            <p class="text-2xl font-bold text-red-500">${lostAds}</p>
                         </div>
-                        <div class="bg-found-green/5 p-4 lg:p-6 rounded-lg lg:rounded-xl text-center">
-                            <p class="text-xs lg:text-sm text-charcoal/40 uppercase tracking-widest mb-1 lg:mb-2">Bulunan</p>
-                            <p class="text-2xl lg:text-4xl font-light text-found-green">${foundAds}</p>
+                        <div class="bg-green-50 p-4 rounded-xl text-center">
+                            <p class="text-xs text-green-500 uppercase tracking-wider mb-1">Bulunan</p>
+                            <p class="text-2xl font-bold text-green-500">${foundAds}</p>
                         </div>
                     </div>
                     
-                    <div class="mb-8 lg:mb-12">
-                        <div class="flex items-center justify-between mb-4 lg:mb-6">
-                            <h3 class="text-lg lg:text-2xl font-serif font-light">İlanlarım</h3>
-                            <button onclick="showPage('add')" class="px-3 lg:px-4 py-1.5 lg:py-2.5 bg-charcoal text-white text-xs lg:text-sm rounded-lg lg:rounded-xl">
+                    <div class="mb-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold">İlanlarım</h3>
+                            <button onclick="showPage('add')" class="primary-button px-4 py-2">
                                 + Yeni İlan
                             </button>
                         </div>
                         
-                        <div id="prof-ads" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                        <div id="prof-ads" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             ${userItems.length > 0 ? userItems.map(item => `
-                                <div class="bg-white rounded-lg lg:rounded-xl overflow-hidden thin-border cursor-pointer hover:shadow-sm transition" onclick="showItemDetailPopup('${item.id}')">
-                                    <div class="relative h-48 lg:h-56 bg-charcoal/5">
+                                <div class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition" onclick="showItemDetailPopup('${item.id}')">
+                                    <div class="relative h-48 bg-gray-100">
                                         <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
                                         <div class="absolute top-2 left-2">
-                                            <span class="px-2 py-0.5 ${item.type === 'lost' ? 'bg-lost-red/10 text-lost-red' : 'bg-found-green/10 text-found-green'} text-[10px] lg:text-xs uppercase tracking-widest rounded">
+                                            <span class="px-2 py-0.5 ${item.type === 'lost' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'} text-xs uppercase tracking-wider rounded">
                                                 ${item.type === 'lost' ? 'Kayıp' : 'Bulundu'}
                                             </span>
                                         </div>
                                     </div>
-                                    <div class="p-3 lg:p-4">
-                                        <h4 class="font-medium text-sm lg:text-base mb-1 line-clamp-1">${item.title}</h4>
-                                        <p class="text-xs lg:text-sm text-charcoal/40 mb-2 line-clamp-2">${item.description?.substring(0, 80) || ''}</p>
+                                    <div class="p-3">
+                                        <h4 class="font-bold text-sm mb-1 line-clamp-1">${item.title}</h4>
+                                        <p class="text-xs text-gray-500 mb-2 line-clamp-2">${item.description?.substring(0, 80) || ''}</p>
                                         <div class="flex items-center justify-between">
-                                            <span class="text-xs lg:text-sm text-charcoal/30">${formatDate(item.createdAt)}</span>
+                                            <span class="text-xs text-gray-400">${formatDate(item.createdAt)}</span>
                                             ${item.type === 'lost' ? `
                                                 <button onclick="event.stopPropagation(); markAsFound('${item.id}')" 
-                                                        class="px-2 py-1 lg:px-3 lg:py-1.5 bg-found-green/10 text-found-green text-xs lg:text-sm rounded hover:bg-found-green/20 transition">
+                                                        class="px-2 py-1 bg-green-100 text-green-600 text-xs rounded hover:bg-green-200 transition">
                                                     ✅ Bulundu
                                                 </button>
                                             ` : ''}
@@ -2109,12 +2173,12 @@
                                     </div>
                                 </div>
                             `).join('') : `
-                                <div class="col-span-full text-center py-12 lg:py-16">
-                                    <div class="w-12 h-12 lg:w-16 lg:h-16 bg-charcoal/5 rounded-full flex items-center justify-center mx-auto mb-3 lg:mb-4">
-                                        <span class="material-symbols-outlined text-charcoal/40 text-xl lg:text-2xl">inbox</span>
+                                <div class="col-span-full text-center py-12">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <span class="material-symbols-outlined text-gray-400">inbox</span>
                                     </div>
-                                    <p class="text-sm lg:text-base text-charcoal/40 mb-3 lg:mb-4">Henüz ilan bulunmuyor.</p>
-                                    <button onclick="showPage('add')" class="px-4 lg:px-6 py-2 lg:py-3 bg-charcoal text-white text-xs lg:text-sm rounded-lg lg:rounded-xl">
+                                    <p class="text-sm text-gray-400 mb-4">Henüz ilan bulunmuyor.</p>
+                                    <button onclick="showPage('add')" class="primary-button px-6">
                                         İlk İlanını Ver
                                     </button>
                                 </div>
@@ -2129,11 +2193,11 @@
         } catch (error) {
             console.error("Profil yükleme hatası:", error);
             container.innerHTML = `
-                <div class="text-center py-12 lg:py-16">
-                    <div class="w-12 h-12 lg:w-16 lg:h-16 bg-charcoal/5 rounded-full flex items-center justify-center mx-auto mb-3 lg:mb-4">
-                        <span class="material-symbols-outlined text-charcoal/40 text-xl lg:text-2xl">error</span>
+                <div class="text-center py-12">
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="material-symbols-outlined text-gray-400">error</span>
                     </div>
-                    <p class="text-sm lg:text-base text-charcoal/40">Profil yüklenirken bir hata oluştu.</p>
+                    <p class="text-sm text-gray-400">Profil yüklenirken bir hata oluştu.</p>
                 </div>
             `;
             hideLoading();
@@ -2148,58 +2212,68 @@
             
             const modal = document.getElementById('profile-edit-modal');
             modal.innerHTML = `
-                <div class="profile-edit-modal bg-white rounded-2xl overflow-hidden shadow-2xl slide-up max-h-[90vh] overflow-y-auto">
-                    <div class="p-6 lg:p-8">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-2xl lg:text-3xl font-serif font-light">Profili Düzenle</h2>
-                            <button onclick="closeProfileEditModal()" class="p-2 hover:bg-charcoal/5 rounded-lg transition">
-                                <span class="material-symbols-outlined text-charcoal/60">close</span>
+                <div class="profile-edit-container">
+                    <div class="modal-header">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-white">person</span>
+                                </div>
+                                <div>
+                                    <h2 class="modal-title">Profili Düzenle</h2>
+                                    <p class="text-sm text-text-light">Profil bilgilerinizi güncelleyin</p>
+                                </div>
+                            </div>
+                            <button onclick="closeProfileEditModal()" class="modal-close-btn">
+                                <span class="material-symbols-outlined text-xl">close</span>
                             </button>
                         </div>
-                        
+                    </div>
+                    
+                    <div class="modal-body">
                         <div class="space-y-6">
                             <div class="flex flex-col items-center">
-                                <div class="relative mb-4">
+                                <div class="profile-avatar-container">
                                     <img id="profile-preview" src="${userData?.profileImage || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAHgmz9ZdyrrnVStj22LkErbA8T2RxayfdXNwm9XagSatARcd3ffXC_gnMjwdMeTVIM1_naprdoDBH5E3oQbSpPToZ9pFGChkcvGo7fUPwhQIeIDqqxkhg_0GG1S_EIbuKM63LbIbQBaMofSj_XkXehUr35iKp9AOfl7D_5tV9hf9L31MrtXPhZTrnFNVIgStVmeBJPzZwRvfbNPNyWtRAxeHdGww_HnK4TbZVi8SjQ246qUt_7_Kf_MPPuOxI2yvPYY3om-iE61Vc'}" 
-                                         class="profile-avatar rounded-full border-4 border-white shadow-lg">
+                                         class="profile-avatar">
                                     <button onclick="document.getElementById('profile-image-input').click()" 
-                                            class="absolute bottom-2 right-2 size-10 bg-charcoal text-white rounded-full flex items-center justify-center hover:bg-charcoal/90 transition">
+                                            class="avatar-edit-btn">
                                         <span class="material-symbols-outlined text-sm">photo_camera</span>
                                     </button>
                                 </div>
                                 <input type="file" id="profile-image-input" class="hidden" accept="image/*">
-                                <p class="text-xs text-charcoal/40">Profil fotoğrafı değiştir</p>
+                                <p class="text-xs text-text-light">Profil fotoğrafı değiştir</p>
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-charcoal/60 mb-2">Ad Soyad</label>
+                                <label class="form-label">Ad Soyad</label>
                                 <input type="text" id="edit-name" value="${userData?.name || ''}" 
-                                       class="w-full px-4 py-3 bg-off-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none">
+                                       class="form-input">
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-charcoal/60 mb-2">Bio</label>
+                                <label class="form-label">Bio</label>
                                 <textarea id="edit-bio" rows="3" 
-                                          class="w-full px-4 py-3 bg-off-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none resize-none bio-textarea">${userData?.bio || ''}</textarea>
-                                <p class="text-xs text-charcoal/40 mt-1">Kendiniz hakkında kısa bir açıklama</p>
+                                          class="form-input">${userData?.bio || ''}</textarea>
+                                <p class="text-xs text-text-light mt-1">Kendiniz hakkında kısa bir açıklama</p>
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-charcoal/60 mb-2">İletişim Bilgileri</label>
+                                <label class="form-label">İletişim Bilgileri</label>
                                 <input type="text" id="edit-contact" value="${userData?.contact || ''}" 
-                                       class="w-full px-4 py-3 bg-off-white border thin-border rounded-lg focus:ring-1 focus:ring-charcoal focus:border-transparent outline-none">
-                                <p class="text-xs text-charcoal/40 mt-1">Telefon numarası veya diğer iletişim bilgileri</p>
+                                       class="form-input">
+                                <p class="text-xs text-text-light mt-1">Telefon numarası veya diğer iletişim bilgileri</p>
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-charcoal/60 mb-2">E-posta</label>
+                                <label class="form-label">E-posta</label>
                                 <input type="email" value="${currentUser?.email || ''}" disabled
-                                       class="w-full px-4 py-3 bg-charcoal/5 border thin-border rounded-lg outline-none cursor-not-allowed">
-                                <p class="text-xs text-charcoal/40 mt-1">E-posta değiştirilemez</p>
+                                       class="form-input bg-gray-100">
+                                <p class="text-xs text-text-light mt-1">E-posta değiştirilemez</p>
                             </div>
                             
                             <div class="pt-4">
-                                <button onclick="saveProfileChanges()" class="w-full py-3 bg-found-green text-white font-medium rounded-lg hover:bg-found-green/90 transition">
+                                <button onclick="saveProfileChanges()" class="primary-button">
                                     Değişiklikleri Kaydet
                                 </button>
                             </div>
@@ -2234,10 +2308,6 @@
             alert("Profil düzenleme sayfası yüklenirken bir hata oluştu.");
             hideLoading();
         }
-    };
-
-    window.closeProfileEditModal = () => {
-        document.getElementById('profile-edit-modal').classList.add('hidden');
     };
 
     window.saveProfileChanges = async () => {
@@ -2318,42 +2388,20 @@
             const btn = document.getElementById(`filter-${f}`);
             if (btn) {
                 if (f === filter) {
-                    btn.classList.remove('bg-off-white', 'text-lost-red', 'text-found-green', 'border', 'thin-border');
-                    btn.classList.add('bg-charcoal', 'text-white');
+                    btn.classList.remove('bg-white', 'text-lost-red', 'text-found-green', 'border');
+                    btn.classList.add('bg-primary', 'text-white');
                 } else if (f === 'lost') {
-                    btn.classList.remove('bg-charcoal', 'text-white', 'bg-off-white', 'text-found-green', 'border', 'thin-border');
-                    btn.classList.add('bg-off-white', 'text-lost-red', 'border', 'thin-border');
+                    btn.classList.remove('bg-primary', 'text-white', 'bg-white', 'text-found-green', 'border');
+                    btn.classList.add('bg-white', 'text-lost-red', 'border');
                 } else if (f === 'found') {
-                    btn.classList.remove('bg-charcoal', 'text-white', 'bg-off-white', 'text-lost-red', 'border', 'thin-border');
-                    btn.classList.add('bg-off-white', 'text-found-green', 'border', 'thin-border');
+                    btn.classList.remove('bg-primary', 'text-white', 'bg-white', 'text-lost-red', 'border');
+                    btn.classList.add('bg-white', 'text-found-green', 'border');
                 }
             }
         });
         
         loadExploreItems();
     };
-
-    // --- Utility Functions ---
-    function formatDate(dateString) {
-        if (!dateString) return 'Tarih yok';
-        
-        const date = new Date(dateString);
-        const now = new Date();
-        const diff = now - date;
-        
-        if (isNaN(diff)) return 'Tarih yok';
-        
-        if (diff < 60000) return 'Az önce';
-        if (diff < 3600000) return `${Math.floor(diff / 60000)} dakika önce`;
-        if (diff < 86400000) return `${Math.floor(diff / 3600000)} saat önce`;
-        if (diff < 604800000) return `${Math.floor(diff / 86400000)} gün önce`;
-        
-        return date.toLocaleDateString('tr-TR', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        });
-    }
 
     // --- Auth State Listener ---
     onAuthStateChanged(auth, (user) => {
@@ -2367,8 +2415,8 @@
                 
                 document.getElementById('header-profile').innerHTML = `
                     <div class="flex items-center gap-3">
-                        <button onclick="showPage('profile')" class="size-8 lg:size-10 overflow-hidden rounded-full ring-1 ring-charcoal/5">
-                            <img id="header-profile-img" class="h-full w-full object-cover grayscale opacity-80" 
+                        <button onclick="showPage('profile')" class="size-10 overflow-hidden rounded-full ring-2 ring-primary">
+                            <img id="header-profile-img" class="h-full w-full object-cover" 
                                  src="${userData?.profileImage || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAHgmz9ZdyrrnVStj22LkErbA8T2RxayfdXNwm9XagSatARcd3ffXC_gnMjwdMeTVIM1_naprdoDBH5E3oQbSpPToZ9pFGChkcvGo7fUPwhQIeIDqqxkhg_0GG1S_EIbuKM63LbIbQBaMofSj_XkXehUr35iKp9AOfl7D_5tV9hf9L31MrtXPhZTrnFNVIgStVmeBJPzZwRvfbNPNyWtRAxeHdGww_HnK4TbZVi8SjQ246qUt_7_Kf_MPPuOxI2yvPYY3om-iE61Vc'}">
                         </button>
                     </div>
@@ -2376,8 +2424,8 @@
             }).catch(() => {
                 document.getElementById('header-profile').innerHTML = `
                     <div class="flex items-center gap-3">
-                        <button onclick="showPage('profile')" class="size-8 lg:size-10 overflow-hidden rounded-full ring-1 ring-charcoal/5">
-                            <img id="header-profile-img" class="h-full w-full object-cover grayscale opacity-80" 
+                        <button onclick="showPage('profile')" class="size-10 overflow-hidden rounded-full ring-2 ring-primary">
+                            <img id="header-profile-img" class="h-full w-full object-cover" 
                                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHgmz9ZdyrrnVStj22LkErbA8T2RxayfdXNwm9XagSatARcd3ffXC_gnMjwdMeTVIM1_naprdoDBH5E3oQbSpPToZ9pFGChkcvGo7fUPwhQIeIDqqxkhg_0GG1S_EIbuKM63LbIbQBaMofSj_XkXehUr35iKp9AOfl7D_5tV9hf9L31MrtXPhZTrnFNVIgStVmeBJPzZwRvfbNPNyWtRAxeHdGww_HnK4TbZVi8SjQ246qUt_7_Kf_MPPuOxI2yvPYY3om-iE61Vc">
                         </button>
                     </div>
@@ -2390,7 +2438,7 @@
             document.getElementById('auth-modal').classList.remove('hidden');
             document.getElementById('header-profile').innerHTML = `
                 <button onclick="document.getElementById('auth-modal').classList.remove('hidden')"
-                        class="px-4 lg:px-6 py-2 lg:py-3 bg-charcoal text-white text-xs lg:text-sm font-medium rounded-lg lg:rounded-xl">
+                        class="px-4 py-2 bg-primary text-white text-sm font-bold rounded-lg">
                     Giriş Yap
                 </button>
             `;
